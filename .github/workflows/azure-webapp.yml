@@ -21,18 +21,28 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      
+      #### sonar qube
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Begin SonarQube Analysis
+        run: |
+          dotnet sonarscanner begin \
+            /k:"my-project" \
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      ### sonar qube
+
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+     ### sinar qube
+      - name: End SonarQube Analysis
         run: |
-          ./gradlew sonar \
-            -Dsonar.projectKey=my-project \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.token=$SONAR_TOKEN
+          dotnet sonarscanner end \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+    ### sonar qube
 
       - name: Publish
         env:
