@@ -24,6 +24,16 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          ./gradlew sonar \
+            -Dsonar.projectKey=my-project \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.token=$SONAR_TOKEN
+
       - name: Publish
         env:
           DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
