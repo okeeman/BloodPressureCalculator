@@ -24,14 +24,13 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      # run sonar cloud analyis (report in https://sonarcloud.io/project/information?id=gclynch_bankCI2026)
-      # define SONAR_TOKEN secret in repo to match token in Sonarcloud account
+      # run sonar cloud analyis (report in https://sonarcloud.io/project/overview?id=okeeman_BloodPressureCalculator)
       - name: Analyze code with SonarCloud
         uses: SonarSource/sonarqube-scan-action@v8.1.0
         with:
           args: >
-            -Dsonar.organization=gclynch
-            -Dsonar.projectKey=gclynch_bankCI2026
+            -Dsonar.organization=okeeman
+            -Dsonar.projectKey=okeeman_BloodPressureCalculator
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.verbose=true
          env:
