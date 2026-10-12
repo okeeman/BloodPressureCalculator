@@ -8,7 +8,8 @@ on:
 
 # Added for CodeQL as this is a fork.
 permissions:
-  security-events: read
+  contents: read
+  security-events: write
 
 jobs:
   build-and-deploy:
