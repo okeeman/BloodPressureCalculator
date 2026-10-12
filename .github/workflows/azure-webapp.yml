@@ -6,6 +6,10 @@ on:
       - master
   workflow_dispatch:
 
+# Added for CodeQL as this is a fork.
+permissions:
+  security-events: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
