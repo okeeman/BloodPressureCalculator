@@ -46,8 +46,9 @@ jobs:
         with:
           languages: csharp
 
+      # All CodeQL Actions must be the same version number.
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "security"
 
