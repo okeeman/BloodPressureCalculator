@@ -6,9 +6,20 @@ on:
       - master
   workflow_dispatch:
 
-jobs:
+jobs:        
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    # Added for CodeQL as this is a fork.
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      matrix: 
+        language: [ 'csharp' ]
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,12 +28,57 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-
+          
+      # CodeQL needs a clean build.
+      - name: Clean
+        run: dotnet clean
+        
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
+
+      # run sonar cloud analyis (report in https://sonarcloud.io/project/overview?id=okeeman_BloodPressureCalculator)
+      - name: Analyze code with SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v8.1.0
+        with:
+          args: >
+            -Dsonar.organization=okeeman
+            -Dsonar.projectKey=okeeman_BloodPressureCalculator
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.verbose=true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Initialise CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: csharp
+
+      - name: CodeQL autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      # All CodeQL Actions must be the same version number.
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "security"
+
+     # Set up Playwright testing
+      - name: Set up Node
+        uses: github/actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
 
       - name: Publish
         env:
