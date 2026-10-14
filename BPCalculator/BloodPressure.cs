@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace BPCalculator
 {
@@ -26,14 +29,17 @@ namespace BPCalculator
         [Range(DiastolicMin, DiastolicMax, ErrorMessage = "Invalid Diastolic Value")]
         public int Diastolic { get; set; }                      // mmHG
 
+
         // calculate BP category
         public BPCategory Category
         {
             get
             {
-                // implement as part of project
-                //throw new NotImplementedException("not implemented yet");
-                if (Systolic >= 140 || Diastolic >= 90) 
+                // This logic matches the chart supplied. It may be that clinical practice is to require
+                // both systolic and diastolic to be in the range to receive a particular diagnosis.
+                // In practice this would have to be clarified with the client.
+                // I am assuming for the purposes of this assignment that this is the logic desired.
+                if (Systolic >= 140 || Diastolic >= 90)
                 {
                     return BPCategory.High;
                 }
@@ -49,7 +55,6 @@ namespace BPCalculator
                 {
                     return BPCategory.Ideal;
                 }
-                //return new BPCategory();                       // replace this
             }
         }
     }

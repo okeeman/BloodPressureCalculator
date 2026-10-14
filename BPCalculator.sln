@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.10.12224.181 stable
+VisualStudioVersion = 18.10.12224.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPCalculator", "BPCalculator\BPCalculator.csproj", "{5966DA6C-819D-4303-ADC7-425B8541EC84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBPCalculator", "TestBPCalculator\TestBPCalculator.csproj", "{42AED144-9EE4-4489-8763-902442190245}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPCalculatorUnitTests", "TestBPCalculator\BPCalculatorUnitTests.csproj", "{42AED144-9EE4-4489-8763-902442190245}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPCalculatorE2EPlaywright", "BPCalculatorE2EPlaywright\BPCalculatorE2EPlaywright.csproj", "{2ABD36CE-72C3-4A13-BB3D-67EB868BF8FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{42AED144-9EE4-4489-8763-902442190245}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42AED144-9EE4-4489-8763-902442190245}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42AED144-9EE4-4489-8763-902442190245}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ABD36CE-72C3-4A13-BB3D-67EB868BF8FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ABD36CE-72C3-4A13-BB3D-67EB868BF8FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ABD36CE-72C3-4A13-BB3D-67EB868BF8FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ABD36CE-72C3-4A13-BB3D-67EB868BF8FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
