@@ -67,7 +67,7 @@ jobs:
 
      # Set up Playwright testing
       - name: Set up Node
-        uses: github/actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
