@@ -65,20 +65,12 @@ jobs:
         with:
           category: "security"
 
-     # Set up Playwright testing
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+     # Playwright testing
+      - name: Install Playwright browsers
+        run: pwsh bin/Debug/net9.0/playwright.ps1 install --with-deps
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run tests
+        run: dotnet test --no-build
 
       - name: Publish
         env:
