@@ -30,6 +30,7 @@ jobs:
           dotnet-version: '9.0.x'
           
       # CodeQL needs a clean build.
+      # is this really necesary??? try removing this. 
       - name: Clean
         run: dotnet clean
         
