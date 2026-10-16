@@ -78,6 +78,7 @@ jobs:
           package: ${{ github.workspace }}/publish
 
   playwright_tests:
+    needs: build-and-deploy
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
