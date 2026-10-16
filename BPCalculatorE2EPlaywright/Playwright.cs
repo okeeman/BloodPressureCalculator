@@ -6,22 +6,16 @@
         [TestMethod]
         public async Task HomepageHasPlaywrightInTitleAndGetStartedLinkLinkingToTheIntroPage()
         {
-            await Page.GotoAsync("https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/");
-
-            // Expect a title "to contain" a substring.
+            var baseUrl = Environment.GetEnvironmentVariable("PLAYWRIGHT_BASE_URL")
+                ?? "https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/";
+            await Page.GotoAsync(baseUrl);
             await Expect(Page).ToHaveTitleAsync(new Regex("BP Category Calculator"));
 
-            // create a locator
-            var submit = Page.Locator("text=Submit");
+            await Page.Locator("#BP_Systolic").FillAsync("140");
+            await Page.Locator("#BP_Diastolic").FillAsync("90");
+            await Page.Locator("input[type=submit]").ClickAsync();
 
-            // Expect an attribute "to be strictly equal" to the value.
-            await Expect(submit).ToHaveAttributeAsync("class", "btn btn-default");
-
-            // Click the get started link.
-            await submit.ClickAsync();
-
-            // Expects the URL to contain intro.
-            await Expect(Page).ToHaveURLAsync(new Regex("bloodpressure"));
+            await Expect(Page.Locator("body")).ToContainTextAsync("High Blood Pressure");
         }
     }
 }

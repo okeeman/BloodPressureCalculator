@@ -1,92 +1,92 @@
-name: Build and deploy ASP.NET Core app to Azure Web App
+name: Build, test, analyze, and deploy
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
+  pull_request:
+    branches: [master]
   workflow_dispatch:
 
-jobs:        
-  build-and-deploy:
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  build-test-analyze-deploy:
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-    # Added for CodeQL as this is a fork.
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      matrix: 
-        language: [ 'csharp' ]
-      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Set up .NET SDKs
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
-          
-      # CodeQL needs a clean build.
-      - name: Clean
-        run: dotnet clean
-        
-      - name: Restore dependencies
-        run: dotnet restore
+          dotnet-version: |
+            9.0.x
+            10.0.x
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - name: Install SonarScanner for .NET
+        if: env.SONAR_TOKEN != ''
+        run: dotnet tool install --global dotnet-sonarscanner
 
-      # run sonar cloud analyis (report in https://sonarcloud.io/project/overview?id=okeeman_BloodPressureCalculator)
-      - name: Analyze code with SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v8.1.0
-        with:
-          args: >
-            -Dsonar.organization=okeeman
-            -Dsonar.projectKey=okeeman_BloodPressureCalculator
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.verbose=true
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Begin SonarQube Cloud analysis
+        if: env.SONAR_TOKEN != ''
+        run: dotnet sonarscanner begin /k:"okeeman_BloodPressureCalculator" /o:"okeeman" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io"
 
-      - name: Initialise CodeQL
+      - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: csharp
 
-      - name: CodeQL autobuild
-        uses: github/codeql-action/autobuild@v4
+      - name: Restore solution
+        run: dotnet restore BPCalculator.sln
 
-      # All CodeQL Actions must be the same version number.
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "security"
+      - name: Build solution
+        run: dotnet build BPCalculator.sln --configuration Release --no-restore
 
-     # Set up Playwright testing
-      - name: Set up Node
-        uses: github/actions/setup-node@v4
-        with:
-          node-version: lts/*
+      - name: Run unit tests
+        run: dotnet test TestBPCalculator/BPCalculatorUnitTests.csproj --configuration Release --no-build --no-restore
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Playwright browsers
+        run: pwsh BPCalculatorE2EPlaywright/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      - name: Start web app
+        run: |
+          nohup dotnet BPCalculator/bin/Release/net9.0/BPCalculator.dll --urls http://127.0.0.1:5000 > "$RUNNER_TEMP/bpc-calculator.log" 2>&1 &
+          for attempt in {1..30}; do
+            if curl --silent --fail http://127.0.0.1:5000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/bpc-calculator.log"
+          exit 1
 
       - name: Run Playwright tests
-        run: npx playwright test
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:5000
+        run: dotnet test BPCalculatorE2EPlaywright/BPCalculatorE2EPlaywright.csproj --configuration Release --no-build --no-restore
+
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: security
+
+      - name: End SonarQube Cloud analysis
+        if: env.SONAR_TOKEN != ''
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
       - name: Publish
-        env:
-          DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
-        run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output "${{ github.workspace }}/publish"
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
