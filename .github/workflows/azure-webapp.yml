@@ -87,6 +87,9 @@ jobs:
       with:
         node-version: lts/*
 
+    - name: Got to folder with Playwright tests
+      run: cd BPCalculatorE2EPlaywright
+
     - name: Debug npm ci
       run: |
         pwd
