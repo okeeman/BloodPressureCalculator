@@ -78,6 +78,8 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ github.workspace }}/publish
 
+### might be better to do the tests before deploy????
+### tests are run on the live website using tests in github runner/repo????
   playwright_tests:
     needs: build-and-deploy
     runs-on: ubuntu-latest
@@ -103,7 +105,9 @@ jobs:
       run: npx playwright install --with-deps
       
     - name: Run Playwright tests
-      run: npx playwright test
+      env:
+        PLAYWRIGHT_BASE_URL: https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/
+      run: dotnet test BPCalculatorE2EPlaywright/BPCalculatorE2EPlaywright.csproj --configuration Release
       
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
