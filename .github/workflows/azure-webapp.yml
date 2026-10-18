@@ -66,21 +66,9 @@ jobs:
         with:
           category: "security"
 
-     ##### Playwright
-      - name: Install Playwright browsers
-        run: |
-          # Changing directory here. Remember to change back after the Playwright tests.
-          cd BPCalculatorE2EPlaywright
-          pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps
 
-      - name: Run tests
-        run: dotnet test
-   ### End Playwright
 
      ##### Publish, create .zip
-      - name: Change back to main directory
-        run: cd ..
-     
       - name: Publish
         env:
           DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
@@ -92,3 +80,16 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ github.workspace }}/publish
+
+     ##### Playwright
+      - name: Install Playwright browsers
+        run: |
+          # Changing directory here. Remember to change back after the Playwright tests if there are more steps.
+          # improve performance by: caching browser download, nuget packages, break steps out into jobs, target release.
+          # steps run in sequence, jobs run in parallel.
+          cd BPCalculatorE2EPlaywright
+          pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps
+
+      - name: Run tests
+        run: dotnet test
+   ### End Playwright    
