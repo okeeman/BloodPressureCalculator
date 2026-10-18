@@ -72,7 +72,9 @@ jobs:
       - name: Publish
         env:
           DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
-        run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
+        ## A windows runner must have path separators. The first one below is for Linux.
+        #run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
+        run: dotnet publish .\BPCalculator\BPCalculator.csproj -c Release -o \$DOTNET_PUBLISH_DIR
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
