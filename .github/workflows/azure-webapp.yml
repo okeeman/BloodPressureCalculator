@@ -66,6 +66,27 @@ jobs:
         with:
           category: "security"
 
+     ##### Playwright
+      - name: Install dependencies
+        run: npm ci --verbose
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run Playwright tests
+        env:
+          PLAYWRIGHT_BASE_URL: https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/
+        run: dotnet test BPCalculatorE2EPlaywright/BPCalculatorE2EPlaywright.csproj --configuration Release
+      
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+   ### End Playwright
+
+     ##### Publish, create .zip
       - name: Publish
         env:
           DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
@@ -77,41 +98,3 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ github.workspace }}/publish
-
-### might be better to do the tests before deploy????
-### tests are run on the live website using tests in github runner/repo????
-  playwright_tests:
-    needs: build-and-deploy
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./BPCalculatorE2EPlaywright
-    steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-node@v6
-      with:
-        node-version: lts/*
-
-    - name: Debug npm ci
-      run: |
-        pwd
-        ls -la
-        find . -name package.json
-      
-    - name: Install dependencies
-      run: npm ci --verbose
-      
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-      
-    - name: Run Playwright tests
-      env:
-        PLAYWRIGHT_BASE_URL: https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/
-      run: dotnet test BPCalculatorE2EPlaywright/BPCalculatorE2EPlaywright.csproj --configuration Release
-      
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
