@@ -51,6 +51,9 @@ jobs:
       - name: Run unit tests
         run: dotnet test TestBPCalculator/BPCalculatorUnitTests.csproj --configuration Release --no-build --no-restore
 
+      - name: Set up Chrome for Selenium
+        uses: browser-actions/setup-chrome@v1
+
       - name: Install Playwright browsers
         run: pwsh BPCalculatorE2EPlaywright/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
@@ -69,6 +72,7 @@ jobs:
       - name: Run Playwright tests
         env:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:5000
+          SELENIUM_BASE_URL: http://127.0.0.1:5000
         run: dotnet test BPCalculatorE2EPlaywright/BPCalculatorE2EPlaywright.csproj --configuration Release --no-build --no-restore
 
       - name: Analyze with CodeQL

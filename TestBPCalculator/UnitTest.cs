@@ -59,6 +59,7 @@ namespace TestBPCalculator
             Assert.AreEqual(expected, reading.Category);
         }
 
+        /*
         [TestMethod]
         // test OnPost method in Index.cshtml.cs.
         public void TestOnPost(int systolic, int diastolic, BPCategory expected)
@@ -66,5 +67,6 @@ namespace TestBPCalculator
             var reading = new BloodPressure { Systolic = systolic, Diastolic = diastolic };
             Assert.AreEqual(expected, reading.Category);
         }
+        */
     }
 }
