@@ -48,46 +48,14 @@ jobs:
       - name: Build solution
         run: dotnet build BPCalculator.sln --configuration Release --no-restore
 
-      - name: Run unit tests
-        run: dotnet test TestBPCalculator/BPCalculatorUnitTests.csproj --configuration Release --no-build --no-restore
 
-      - name: Set up Chrome for Selenium
-        uses: browser-actions/setup-chrome@v1
 
-      - name: Install Playwright browsers
-        run: pwsh BPCalculatorE2EPlaywright/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
-
-      - name: Start web app
-        run: |
-          nohup dotnet BPCalculator/bin/Release/net9.0/BPCalculator.dll --urls http://127.0.0.1:5000 > "$RUNNER_TEMP/bpc-calculator.log" 2>&1 &
-          for attempt in {1..30}; do
-            if curl --silent --fail http://127.0.0.1:5000/ > /dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-          cat "$RUNNER_TEMP/bpc-calculator.log"
-          exit 1
-
-      - name: Run Playwright tests
-        env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:5000
-          SELENIUM_BASE_URL: http://127.0.0.1:5000
-        run: dotnet test BPCalculatorE2EPlaywright/BPCalculatorE2EPlaywright.csproj --configuration Release --no-build --no-restore
-
-      - name: Analyze with CodeQL
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: security
-
-      - name: End SonarQube Cloud analysis
-        if: env.SONAR_TOKEN != ''
-        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
-
+     ##### Publish, create .zip
       - name: Publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output "${{ github.workspace }}/publish"
-
+        env:
+          DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
+        run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
+    
       - name: Deploy to Azure Web App
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: azure/webapps-deploy@v3
@@ -95,3 +63,19 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ github.workspace }}/publish
+
+     ##### Playwright
+      - name: Install Playwright browsers
+        run: |
+          # Changing directory here. Remember to change back after the Playwright tests if there are more steps.
+          # improve performance by: caching browser download, nuget packages, break steps out into jobs, target release.
+          # steps run in sequence, jobs run in parallel.
+          cd BPCalculatorE2EPlaywright
+          pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps
+
+      - name: Run tests
+        run: dotnet test
+   ### End Playwright    
+   # Run Selenium tests
+      - name: Run Selenium tests
+        run: dotnet test ${{ github.workspace }}/publish/SeleniumTests.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
