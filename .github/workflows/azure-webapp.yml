@@ -8,10 +8,7 @@ on:
 
 jobs:        
   build-and-deploy:
-    runs-on: windows-latest
-    env:
-      AZURE_WEBAPP_NAME: BloodPressureWebApp      
-      AZURE_WEBAPP_PACKAGE_PATH: /BPCalculator
+    runs-on: ubuntu-latest
 
     # Added for CodeQL as this is a fork.
     permissions:
@@ -73,13 +70,10 @@ jobs:
 
      ##### Publish, create .zip
       - name: Publish
-        #env:
-          #DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
-        ## A windows runner must have path separators. The first one below is for Linux.
-        #run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
-        #run: dotnet publish .\BPCalculator\BPCalculator.csproj -c Release -o "$DOTNET_PUBLISH_DIR"
-        run: dotnet publish -c Release -o ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp
-
+        env:
+          DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
+        run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
+    
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
