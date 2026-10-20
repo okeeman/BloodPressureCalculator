@@ -10,10 +10,11 @@ namespace BPCalculator
     // BP categories
     public enum BPCategory
     {
-        [Display(Name="Low Blood Pressure")] Low,
-        [Display(Name="Ideal Blood Pressure")]  Ideal,
-        [Display(Name="Pre-High Blood Pressure")] PreHigh,
-        [Display(Name ="High Blood Pressure")]  High
+        // This is the text that displays on the web page.
+        [Display(Name= "Low: Consider consulting a healthcare professional if you experience dizziness, fainting, or other symptoms.")] Low,
+        [Display(Name= "Ideal: Maintain your healthy habits and continue regular monitoring.")]  Ideal,
+        [Display(Name= "Pre-High: Adopt lifestyle changes such as reducing salt intake and increasing physical activity.")] PreHigh,
+        [Display(Name = "High: Consult a healthcare professional about managing your blood pressure and reducing health risks.")]  High
     };
 
     public class BloodPressure
@@ -34,11 +35,7 @@ namespace BPCalculator
         public BPCategory Category
         {
             get
-            {
-                // This logic matches the chart supplied. It may be that clinical practice is to require
-                // both systolic and diastolic to be in the range to receive a particular diagnosis.
-                // In practice this would have to be clarified with the client.
-                // I am assuming for the purposes of this assignment that this is the logic desired.
+            { 
                 if (Systolic >= 140 || Diastolic >= 90)
                 {
                     return BPCategory.High;
