@@ -93,3 +93,6 @@ jobs:
       - name: Run tests
         run: dotnet test
    ### End Playwright    
+   # Run Selenium tests
+      - name: Run Selenium tests
+        run: dotnet test ${{ github.workspace }}/publish/SeleniumTests.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
