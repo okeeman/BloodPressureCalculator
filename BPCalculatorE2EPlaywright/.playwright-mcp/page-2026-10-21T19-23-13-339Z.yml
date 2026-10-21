@@ -1,0 +1,22 @@
+- generic [active] [ref=f5e1]:
+  - banner [ref=f5e2]:
+    - navigation [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - heading "Blood Pressure Calculator" [level=1] [ref=f5e5]
+        - generic:
+          - list:
+            - listitem
+            - listitem
+  - main [ref=f5e7]:
+    - separator [ref=f5e8]
+    - generic [ref=f5e11]:
+      - generic [ref=f5e12]:
+        - generic [ref=f5e13]: Systolic
+        - spinbutton "Systolic" [ref=f5e14]: "125"
+      - generic [ref=f5e15]:
+        - generic [ref=f5e16]: Diastolic
+        - spinbutton "Diastolic" [ref=f5e17]: "75"
+      - button "Submit" [ref=f5e19] [cursor=pointer]
+    - 'heading "Pre-High: Adopt lifestyle changes such as reducing salt intake and increasing physical activity." [level=4] [ref=f5e20]'
+  - contentinfo [ref=f5e22]:
+    - generic [ref=f5e23]: © 2026 - TU Dublin

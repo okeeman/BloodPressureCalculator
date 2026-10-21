@@ -4,7 +4,7 @@
   "description": "Blood Pressure Calculator\r ASP.Net Core",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test"
   },
   "repository": {
     "type": "git",
@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/okeeman/BloodPressureCalculator/issues"
   },
-  "homepage": "https://github.com/okeeman/BloodPressureCalculator#readme"
+  "homepage": "https://github.com/okeeman/BloodPressureCalculator#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
 }
