@@ -11,12 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="MSTest" Version="4.0.2" />
-<<<<<<< HEAD
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.51.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="155.0.8059.8400" />
-=======
->>>>>>> 0f204093887fa8b4a624f80b545e34e46775bf94
   </ItemGroup>
 
   <ItemGroup>
