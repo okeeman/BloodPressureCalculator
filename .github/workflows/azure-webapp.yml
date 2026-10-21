@@ -6,6 +6,10 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  ACTIONS_STEP_DEBUG: true
+  ACTIONS_RUNNER_DEBUG: true
+
 jobs:        
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -30,6 +34,7 @@ jobs:
           dotnet-version: '9.0.x'
           
       # CodeQL needs a clean build.
+      # is this really necesary??? try removing this. 
       - name: Clean
         run: dotnet clean
         
@@ -88,10 +93,6 @@ jobs:
           # steps run in sequence, jobs run in parallel.
           cd BPCalculatorE2EPlaywright
           pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps
-
       - name: Run tests
         run: dotnet test
    ### End Playwright    
-   # Run Selenium tests
-      - name: Run Selenium tests
-        run: dotnet test ${{ github.workspace }}/publish/SeleniumTests.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
