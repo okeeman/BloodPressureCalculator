@@ -87,14 +87,15 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ github.workspace }}/publish
 
-      - name: Deploy Secondary if primary failed
-        if: steps.primary.outcome == 'failure'
-        uses: azure/webapps-deploy@v3
+      - name: Deploy Bicep
+        uses: azure/bicep-deploy@v2
         with:
-          #  put different details in these.
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ github.workspace }}/publish     
+         type: deployment
+         operation: create
+         scope: resourceGroup
+         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+         resource-group-name: myResourceGroup
+         template-file: ./infra/main.bicep    
 
      ##### Playwright
       - name: Set up Node
