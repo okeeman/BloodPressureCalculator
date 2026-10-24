@@ -2,4 +2,24 @@
 Blood Pressure Calculator
 ASP.Net Core
 
+## Load test
+
+Install [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/), then start the web app and run:
+
+```sh
+npm run loadtest
+```
+
+The test ramps up to 10 virtual users, holds that load for one minute, and ramps down. It loads the calculator page and submits valid readings across all four categories, including the Razor Pages antiforgery token.
+
+Set `BASE_URL` to target a different running instance (default: `http://localhost:5000`) and `MAX_VUS` to change the peak virtual users. For example, in PowerShell:
+
+```powershell
+$env:BASE_URL = "https://your-app.example.com"
+$env:MAX_VUS = "20"
+npm run loadtest
+```
+
+Run load tests only against systems you own or are authorized to test.
+
 [![.github/workflows/azure-webapp.yml](https://github.com/okeeman/BloodPressureCalculator/actions/workflows/azure-webapp.yml/badge.svg)](https://github.com/okeeman/BloodPressureCalculator/actions/workflows/azure-webapp.yml)

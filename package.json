@@ -4,7 +4,8 @@
   "description": "Blood Pressure Calculator\r ASP.Net Core",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "loadtest": "k6 run loadtest/blood-pressure.js"
   },
   "repository": {
     "type": "git",
