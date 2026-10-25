@@ -12,29 +12,41 @@ const readings = [
   { systolic: 150, diastolic: 95, category: 'High:' },
 ];
 
-export const options = {
-  scenarios: {
-    calculator_load: {
+if (!Number.isInteger(maxVUs) || maxVUs < readings.length) {
+  throw new Error(`MAX_VUS must be an integer of at least ${readings.length} so every category can run concurrently.`);
+}
+
+const baseVUsPerScenario = Math.floor(maxVUs / readings.length);
+const additionalVUs = maxVUs % readings.length;
+const scenarios = Object.fromEntries(
+  readings.map((_, index) => [
+    `category_${index + 1}`,
+    {
       executor: 'ramping-vus',
+      exec: `testCategory${index + 1}`,
       startVUs: 0,
       stages: [
-        { duration: '30s', target: maxVUs },
-        { duration: '1m', target: maxVUs },
+        { duration: '30s', target: baseVUsPerScenario + (index < additionalVUs ? 1 : 0) },
+        { duration: '1m', target: baseVUsPerScenario + (index < additionalVUs ? 1 : 0) },
         { duration: '15s', target: 0 },
       ],
     },
-  },
+  ]),
+);
+
+export const options = {
+  scenarios,
   thresholds: {
-    checks: ['rate>0.99'],
-    http_req_duration: ['p(95)<1000'],
-    http_req_failed: ['rate<0.01'],
+    checks: [{ threshold: 'rate>0.99', abortOnFail: true, delayAbortEval: '10s' }],
+    http_req_duration: [{ threshold: 'p(95)<1000', abortOnFail: true, delayAbortEval: '10s' }],
+    http_req_failed: [{ threshold: 'rate<0.01', abortOnFail: true, delayAbortEval: '10s' }],
   },
-   cloud: {
+  cloud: {
     projectID: 8495420,
   },
 };
 
-export default function () {
+function submitReading(reading) {
   const page = http.get(`${baseUrl}/`);
   const pageLoaded = check(page, {
     'calculator page responds successfully': (response) => response.status === 200,
@@ -54,7 +66,6 @@ export default function () {
     return;
   }
 
-  const reading = readings[__ITER % readings.length];
   const result = http.post(
     `${baseUrl}/`,
     {
@@ -74,4 +85,20 @@ export default function () {
   });
 
   sleep(1);
+}
+
+export function testCategory1() {
+  submitReading(readings[0]);
+}
+
+export function testCategory2() {
+  submitReading(readings[1]);
+}
+
+export function testCategory3() {
+  submitReading(readings[2]);
+}
+
+export function testCategory4() {
+  submitReading(readings[3]);
 }

@@ -10,7 +10,7 @@ Install [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/), then start 
 npm run loadtest
 ```
 
-The test ramps up to 10 virtual users, holds that load for one minute, and ramps down. It loads the calculator page and submits valid readings across all four categories, including the Razor Pages antiforgery token.
+The test runs four category-specific scenarios concurrently, ramping up to 10 virtual users total, holding that load for one minute, and ramping down. Set `MAX_VUS` to an integer of at least 4; k6 distributes the total peak VUs across the scenarios. Each scenario loads the calculator page and submits its reading, including the Razor Pages antiforgery token. A failed threshold aborts the run after its 10-second evaluation delay.
 
 Set `BASE_URL` to target a different running instance (default: `http://localhost:5000`) and `MAX_VUS` to change the peak virtual users. For example, in PowerShell:
 
