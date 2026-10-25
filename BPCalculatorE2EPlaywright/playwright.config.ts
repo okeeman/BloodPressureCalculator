@@ -19,8 +19,7 @@ export default defineConfig({
   // Limit the whole test run, so that it fails with a report instead of hanging.
   globalTimeout: 60 * 60 * 1000,
 
-  // Reporter to use
-  reporter: 'html',
+  reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }]],
 
   use: {
     // Base URL to use in actions like `await page.goto('/')`.
@@ -36,10 +35,4 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Run your local dev server before starting the tests.
-  webServer: {
-    command: 'npm run start',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-  },
 });
