@@ -47,14 +47,16 @@ public sealed class BloodPressureCalculatorSteps
     public void ThenThePageDisplays(string expectedText)
     {
         Assert.IsNotNull(_page);
-        StringAssert.Contains(_page, expectedText);
+        //StringAssert.Contains(_page, expectedText);
+        Assert.Contains(_page, expectedText);
     }
 
     [Then("the page displays the validation error {string}")]
     public void ThenThePageDisplaysTheValidationError(string expectedError)
     {
         Assert.IsNotNull(_page);
-        StringAssert.Contains(_page, expectedError);
+        //StringAssert.Contains(_page, expectedError);
+        Assert.Contains(_page, expectedError);
     }
 
     [AfterScenario]
