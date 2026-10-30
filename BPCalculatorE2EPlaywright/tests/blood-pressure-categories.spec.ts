@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 test("classifies readings into every blood pressure category", async ({ page }) => {
-  await page.goto(
-    "https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/",
-  );
+  const baseUrl =
+    process.env.BASE_URL ??
+    "https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/";
+  await page.goto(baseUrl);
 
   const readings = [
     { systolic: 80, diastolic: 50, category: "Low" },

@@ -11,20 +11,12 @@ env:
   ACTIONS_RUNNER_DEBUG: true
   URI: https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/
 
-jobs:        
-  build-and-deploy:
+jobs:
+  build-and-test:
     runs-on: ubuntu-latest
-
-    # Added for CodeQL as this is a fork.
     permissions:
-      actions: read
       contents: read
-      security-events: write
 
-    strategy:
-      matrix: 
-        language: [ 'csharp' ]
-      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,13 +24,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
-          
-      # CodeQL needs a clean build.
-      # is this really necesary??? try removing this. 
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
       - name: Clean
         run: dotnet clean
-        
+
       - name: Restore dependencies
         run: dotnet restore
 
@@ -48,7 +40,44 @@ jobs:
       - name: Run Reqnroll acceptance tests
         run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release --no-build
 
-      # run sonar cloud analyis (report in https://sonarcloud.io/project/overview?id=okeeman_BloodPressureCalculator)
+      - name: Publish
+        run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output publish
+
+      - name: Upload web app package
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-package
+          path: publish/
+          if-no-files-found: error
+          retention-days: 1
+
+  code-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Clean
+        run: dotnet clean
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
       - name: Analyze code with SonarCloud
         uses: SonarSource/sonarqube-scan-action@v8.1.0
         with:
@@ -60,7 +89,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Initialise CodeQL
+      - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: csharp
@@ -68,69 +97,100 @@ jobs:
       - name: CodeQL autobuild
         uses: github/codeql-action/autobuild@v4
 
-      # All CodeQL Actions must be the same version number.
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:
           category: "security"
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - build-and-test
+      - code-analysis
+    permissions:
+      contents: read
 
+    steps:
+      - name: Download web app package
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp-package
+          path: publish
 
-     ##### Publish, create .zip
-      - name: Publish
-        env:
-          DOTNET_PUBLISH_DIR: ${{ github.workspace }}/publish
-        run: dotnet publish -c Release -o $DOTNET_PUBLISH_DIR
-    
       - name: Deploy to Azure Web App
-        id: primary
-        continue-on-error: true
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ github.workspace }}/publish  
+          package: publish
+
+  selenium-tests:
+    runs-on: ubuntu-latest
+    needs: deploy
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
       - name: Run Selenium tests
-        run: xvfb-run --auto-servernum dotnet test SeleniumTests/SeleniumTests.csproj --configuration Release --no-build
+        run: xvfb-run --auto-servernum dotnet test SeleniumTests/SeleniumTests.csproj --configuration Release
+        env:
+          BASE_URL: ${{ env.URI }}
 
-     ##### Playwright
+  playwright-tests:
+    runs-on: ubuntu-latest
+    needs: deploy
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
           node-version: lts/*
 
-      - name: Get installed Playwright version
-        id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').dependencies['@playwright/test'].version)")" >> $GITHUB_ENV
-        
-      - name: Cache playwright binaries
-        uses: actions/cache@v3
-        id: playwright-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }} 
-          
       - name: Install dependencies
         run: npm ci
-        
-      - name: Install Playwright Browsers
+
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps
-        
- 
+
       - name: Run Playwright tests
         run: npx playwright test
         working-directory: BPCalculatorE2EPlaywright
+        env:
+          BASE_URL: ${{ env.URI }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         with:
           name: playwright-report
           path: BPCalculatorE2EPlaywright/playwright-report/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
+
+  k6-load-test:
+    runs-on: ubuntu-latest
+    needs:
+      - selenium-tests
+      - playwright-tests
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up k6
         uses: grafana/setup-k6-action@v1
@@ -141,16 +201,28 @@ jobs:
         run: npm run loadtest:cloud
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
-          K6_CLOUD_STACK_ID: ${{ secrets.K6_CLOUD_STACK_ID }} 
+          K6_CLOUD_STACK_ID: ${{ secrets.K6_CLOUD_STACK_ID }}
+
+  zap-baseline:
+    runs-on: ubuntu-latest
+    needs: k6-load-test
+    permissions:
+      contents: read
+
+    steps:
+      - name: Create ZAP report directory
+        run: mkdir -p zap-report
 
       - name: Pull Docker image for ZAP
         run: docker pull zaproxy/zap-weekly
 
       - name: Run baseline scan
-        run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{env.URI}} -I -r zapreport.html
-  
-      - name: upload ZAP report
-        uses: actions/upload-artifact@v7
+        run: docker run --rm -v "${{ github.workspace }}/zap-report:/zap/wrk/:rw" --user root -t zaproxy/zap-weekly zap-baseline.py -t "${{ env.URI }}" -I -r zapreport.html
+
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
         with:
-         name: ZAPreport
-         path: /report/zapreport.html    
+          name: ZAPreport
+          path: zap-report/zapreport.html
+          if-no-files-found: warn
