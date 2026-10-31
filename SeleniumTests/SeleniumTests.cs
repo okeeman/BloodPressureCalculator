@@ -58,12 +58,23 @@ public class BloodPressureCalculatorSeleniumTests
 
         Driver.FindElement(By.CssSelector("#form1 input[type='submit']")).Click();
 
-        var badge = new WebDriverWait(Driver, TimeSpan.FromSeconds(10))
-            .Until(driver => driver.FindElement(By.CssSelector("h4 .badge")));
+        var categoryDisplayed = new WebDriverWait(Driver, TimeSpan.FromSeconds(10))
+            .Until(driver =>
+            {
+                try
+                {
+                    return driver.FindElement(By.CssSelector("h4 .badge"))
+                        .Text.StartsWith(expectedCategory, StringComparison.Ordinal);
+                }
+                catch (StaleElementReferenceException)
+                {
+                    return false;
+                }
+            });
 
         Assert.IsTrue(
-            badge.Text.StartsWith(expectedCategory, StringComparison.Ordinal),
-            $"Expected category to start with '{expectedCategory}', but got '{badge.Text}'.");
+            categoryDisplayed,
+            $"Expected category to start with '{expectedCategory}'.");
     }
 
     [TestMethod]
@@ -71,20 +82,18 @@ public class BloodPressureCalculatorSeleniumTests
     {
         var systolicInput = Driver.FindElement(By.Id("BP_Systolic"));
         systolicInput.Clear();
-        systolicInput.SendKeys("110");
+        systolicInput.SendKeys("90");
 
         var diastolicInput = Driver.FindElement(By.Id("BP_Diastolic"));
         diastolicInput.Clear();
-        diastolicInput.SendKeys("110");
+        diastolicInput.SendKeys("90");
 
         Driver.FindElement(By.CssSelector("#form1 input[type='submit']")).Click();
 
         var validationSummary = new WebDriverWait(Driver, TimeSpan.FromSeconds(10))
             .Until(driver => driver.FindElement(By.CssSelector(".validation-summary-errors")));
 
-        //StringAssert.Contains(validationSummary.Text, "Systolic must be greater than Diastolic");
         Assert.Contains(validationSummary.Text, "Systolic must be greater than Diastolic");
         Assert.AreEqual(0, Driver.FindElements(By.CssSelector("h4 .badge")).Count);
-        //Assert.IsEmpty(0, Driver.FindElements(By.CssSelector("h4 .badge")).Count);
     }
 }
