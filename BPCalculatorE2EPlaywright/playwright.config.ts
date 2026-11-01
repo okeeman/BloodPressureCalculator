@@ -23,7 +23,9 @@ export default defineConfig({
 
   use: {
     // Base URL to use in actions like `await page.goto('/')`.
-    baseURL: 'http://localhost:3000',
+    baseURL:
+      process.env.BASE_URL ??
+      'https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/',
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',

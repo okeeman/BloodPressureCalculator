@@ -8,7 +8,7 @@ namespace MyTests;
 public class BloodPressureCalculatorSeleniumTests
 {
     private const string DefaultBaseUrl =
-        "https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/";
+        "https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/";
 
     private IWebDriver? _driver;
 
