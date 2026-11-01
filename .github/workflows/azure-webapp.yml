@@ -9,10 +9,10 @@ on:
 env:
   ACTIONS_STEP_DEBUG: true
   ACTIONS_RUNNER_DEBUG: true
-  URI: https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/
+  URI: https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/
 
 jobs:
-  build-and-test:
+  build-and-reqnroll-acceptance-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,7 +46,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  codeql-analysis:
+  codeql:
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -65,16 +65,14 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: csharp
+          build-mode: none
 
-      - name: CodeQL autobuild
-        uses: github/codeql-action/autobuild@v4
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
@@ -115,8 +113,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs:
-      - build-and-test
-      - codeql-analysis
+      - build-and-reqnroll-acceptance-test
+      - codeql
       - sonar-cloud
     permissions:
       contents: read
