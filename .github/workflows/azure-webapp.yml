@@ -68,17 +68,11 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Download build outputs
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: .
-
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Run Reqnroll acceptance tests
-        run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release --no-build --no-restore
+        run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release
 
   codeql:
     runs-on: ubuntu-latest
