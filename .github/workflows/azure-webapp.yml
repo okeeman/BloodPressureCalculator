@@ -12,7 +12,7 @@ env:
   URI: https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/
 
 jobs:
-  build-and-reqnroll-acceptance-test:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,11 +32,18 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Run Reqnroll acceptance tests
-        run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release --no-build
-
       - name: Publish
         run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output publish
+
+      - name: Upload build outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            **/bin/Release/**
+            **/obj/**
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Upload web app package
         uses: actions/upload-artifact@v4
@@ -46,8 +53,36 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  reqnroll-acceptance-test:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Download build outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: .
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run Reqnroll acceptance tests
+        run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release --no-build --no-restore
+
   codeql:
     runs-on: ubuntu-latest
+    needs: build
     permissions:
       actions: read
       contents: read
@@ -57,22 +92,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Download build outputs
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: 10.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
+          name: build-output
+          path: .
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: csharp
           build-mode: none
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
@@ -81,6 +111,7 @@ jobs:
 
   sonar-cloud:
     runs-on: ubuntu-latest
+    needs: build
     permissions:
       contents: read
 
@@ -88,16 +119,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Download build outputs
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: 10.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+          name: build-output
+          path: .
 
       - name: Analyze code with SonarCloud
         uses: SonarSource/sonarqube-scan-action@v8.1.0
@@ -110,10 +136,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  deploy:
+  azure-deploy:
     runs-on: ubuntu-latest
     needs:
-      - build-and-reqnroll-acceptance-test
+      - build
+      - reqnroll-acceptance-test
       - codeql
       - sonar-cloud
     permissions:
@@ -142,7 +169,7 @@ jobs:
 
   selenium-tests:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: azure-deploy
     permissions:
       contents: read
 
@@ -162,7 +189,7 @@ jobs:
 
   playwright-tests:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: azure-deploy
     permissions:
       contents: read
 
@@ -204,9 +231,7 @@ jobs:
 
   k6-load-test:
     runs-on: ubuntu-latest
-    needs:
-      - selenium-tests
-      - playwright-tests
+    needs: azure-deploy
     permissions:
       contents: read
 
@@ -222,6 +247,7 @@ jobs:
       - name: Run k6 load test
         run: npm run loadtest:cloud
         env:
+          BASE_URL: ${{ env.URI }}
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
           K6_CLOUD_STACK_ID: ${{ secrets.K6_CLOUD_STACK_ID }}
 

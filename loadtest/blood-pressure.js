@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { parseHTML } from 'k6/html';
 
-const baseUrl = (__ENV.BASE_URL || 'https://bloodpressurewebapp-dshyerhxb9h4bwgk.italynorth-01.azurewebsites.net/').replace(/\/+$/, '');
+const baseUrl = (__ENV.BASE_URL || 'https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/').replace(/\/+$/, '');
 const maxVUs = Number.parseInt(__ENV.MAX_VUS || '10', 10);
 
 const readings = [
