@@ -10,6 +10,7 @@ env:
   ACTIONS_STEP_DEBUG: true
   ACTIONS_RUNNER_DEBUG: true
   URI: https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/
+  STAGING_URI: https://bloodpressurewebapp-staging-dkf8e2c5eyarfmdp.francecentral-01.azurewebsites.net/
 
 jobs:
   build:
@@ -182,10 +183,12 @@ jobs:
             -Dsonar.projectKey=okeeman_BloodPressureCalculator
             -Dsonar.cs.cobertura.reportsPaths=coverage/*.cobertura.xml
             -Dsonar.verbose=true
+            # Don't analyse test files for code coverage, as they are not part of the production code.
+            -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,playwright/**,k6/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  azure-deploy:
+  azure-deploy-staging:
     runs-on: ubuntu-latest
     needs:
       - build
@@ -216,10 +219,21 @@ jobs:
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           package: publish
+          slot-name: staging
+
+  smoke-test:
+    needs: azure-deploy-staging
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Health Check
+      run: |
+        curl --fail \
+        ${{ env.STAGING_URI }}/health
 
   selenium-tests:
     runs-on: ubuntu-latest
-    needs: azure-deploy
+    needs: azure-deploy-staging
     permissions:
       contents: read
 
@@ -235,11 +249,11 @@ jobs:
       - name: Run Selenium tests
         run: xvfb-run --auto-servernum dotnet test SeleniumTests/SeleniumTests.csproj --configuration Release
         env:
-          BASE_URL: ${{ env.URI }}
+          BASE_URL: ${{ env.STAGING_URI }}
 
   playwright-tests:
     runs-on: ubuntu-latest
-    needs: azure-deploy
+    needs: azure-deploy-staging
     permissions:
       contents: read
 
@@ -268,7 +282,7 @@ jobs:
         run: npx playwright test
         working-directory: BPCalculatorE2EPlaywright
         env:
-          BASE_URL: ${{ env.URI }}
+          BASE_URL: ${{ env.STAGING_URI }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -299,7 +313,7 @@ jobs:
       - name: Run k6 load test
         run: npm run loadtest:cloud
         env:
-          BASE_URL: ${{ env.URI }}
+          BASE_URL: ${{ env.STAGING_URI }}
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
           K6_CLOUD_STACK_ID: ${{ secrets.K6_CLOUD_STACK_ID }}
 
