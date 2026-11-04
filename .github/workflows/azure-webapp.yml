@@ -183,7 +183,6 @@ jobs:
             -Dsonar.projectKey=okeeman_BloodPressureCalculator
             -Dsonar.cs.cobertura.reportsPaths=coverage/*.cobertura.xml
             -Dsonar.verbose=true
-            # Don't analyse test files for code coverage, as they are not part of the production code.
             -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,playwright/**,k6/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
