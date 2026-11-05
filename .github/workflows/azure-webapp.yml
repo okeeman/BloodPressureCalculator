@@ -13,7 +13,7 @@ env:
   STAGING_URI: https://bloodpressurewebapp-staging-dkf8e2c5eyarfmdp.francecentral-01.azurewebsites.net/
 
 jobs:
-  build:
+  lint-build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,6 +29,9 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
+
+      - name: Verify code formatting
+        run: dotnet format --verify-no-changes    
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
@@ -54,9 +57,9 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  unit-and-acceptance-tests:
+  unit-acceptance-tests:
     runs-on: ubuntu-latest
-    needs: build
+    needs: lint-build
     permissions:
       contents: read
 
@@ -88,7 +91,7 @@ jobs:
 
   codeql:
     runs-on: ubuntu-latest
-    needs: build
+    needs: lint-build
     permissions:
       actions: read
       contents: read
@@ -154,8 +157,7 @@ jobs:
   sonar-cloud:
     runs-on: ubuntu-latest
     needs:
-      - build
-      - unit-and-acceptance-tests
+      - lint-build
     permissions:
       contents: read
 
@@ -190,8 +192,8 @@ jobs:
   azure-deploy-staging:
     runs-on: ubuntu-latest
     needs:
-      - build
-      - unit-and-acceptance-tests
+      - lint-build
+      - unit-acceptance-tests
       - codeql
       - dependency-check
       - sonar-cloud
@@ -219,16 +221,6 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           package: publish
           slot-name: staging
-
-  smoke-test:
-    needs: azure-deploy-staging
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Health Check
-      run: |
-        curl --fail \
-        ${{ env.STAGING_URI }}/health
 
   selenium-tests:
     runs-on: ubuntu-latest
@@ -339,3 +331,24 @@ jobs:
           name: ZAPreport
           path: zap-report/zapreport.html
           if-no-files-found: warn
+
+  swap-production:
+    needs:
+      - zap-baseline
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Swap slots
+      run: |
+        az webapp deployment slot swap \
+          --resource-group BloodPressureResourceGroup \
+          --name BloodPressureWebApp \
+          --slot staging \
+          --target-slot production
