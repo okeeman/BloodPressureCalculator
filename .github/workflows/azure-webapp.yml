@@ -158,6 +158,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lint-build
+      - codeql
     permissions:
       contents: read
 
