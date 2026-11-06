@@ -3,27 +3,41 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BPCalculator.Pages
 {
+    /// <summary>
+    /// Handles requests for the blood pressure calculator page.
+    /// </summary>
     public class BloodPressureModel : PageModel
     {
-        [BindProperty]                              // bound on POST
+        /// <summary>
+        /// Gets or sets the blood pressure values submitted by the user.
+        /// </summary>
+        [BindProperty]// bound on POST
         public BloodPressure BP { get; set; }
 
-        // setup initial data
+        /// <summary>
+        /// Initializes the page with default blood pressure values.
+        /// </summary>
         public void OnGet()
         {
-            BP = new BloodPressure() { Systolic = 100, Diastolic = 60 };
+            this.BP = new BloodPressure() { Systolic = 100, Diastolic = 60 };
         }
 
         // POST, validate
         // create a unit test for this!!!
+
+        /// <summary>
+        /// Validates the submitted blood pressure values and returns the page.
+        /// </summary>
+        /// <returns>The page result with any validation errors.</returns>
         public IActionResult OnPost()
         {
             // extra validation
-            if (!(BP.Systolic > BP.Diastolic))
+            if (!(this.BP.Systolic > this.BP.Diastolic))
             {
-                ModelState.AddModelError("", "Systolic must be greater than Diastolic");
+                this.ModelState.AddModelError("", "Systolic must be greater than Diastolic");
             }
-            return Page();
+
+            return this.Page();
         }
     }
 }

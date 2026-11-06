@@ -9,6 +9,7 @@ on:
 env:
   ACTIONS_STEP_DEBUG: true
   ACTIONS_RUNNER_DEBUG: true
+  AZURE_RESOURCE_GROUP: BloodPressureResourceGroup
   URI: https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/
   STAGING_URI: https://bloodpressurewebapp-staging-dkf8e2c5eyarfmdp.francecentral-01.azurewebsites.net/
 
@@ -201,8 +202,13 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    outputs:
+      web-app-name: ${{ steps.deploy-infrastructure.outputs.web-app-name }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download web app package
         uses: actions/download-artifact@v4
         with:
@@ -216,10 +222,22 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Deploy Azure infrastructure
+        id: deploy-infrastructure
+        run: |
+          web_app_name="$(az deployment group create \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "blood-pressure-infrastructure-${{ github.run_id }}" \
+            --template-file infra/app-service.bicep \
+            --parameters infra/app-service.bicepparam \
+            --query 'properties.outputs.webAppName.value' \
+            --output tsv)"
+          echo "web-app-name=$web_app_name" >> "$GITHUB_OUTPUT"
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@02a81bead70021f5284939794bcec79c271ab383
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          app-name: ${{ steps.deploy-infrastructure.outputs.web-app-name }}
           package: publish
           slot-name: staging
 
@@ -335,6 +353,7 @@ jobs:
 
   swap-production:
     needs:
+      - azure-deploy-staging
       - zap-baseline
     runs-on: ubuntu-latest
     permissions:
@@ -352,7 +371,7 @@ jobs:
     - name: Swap slots
       run: |
         az webapp deployment slot swap \
-          --resource-group BloodPressureResourceGroup \
-          --name BloodPressureWebApp \
+          --resource-group "$AZURE_RESOURCE_GROUP" \
+          --name "${{ needs.azure-deploy-staging.outputs.web-app-name }}" \
           --slot staging \
           --target-slot production

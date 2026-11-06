@@ -5,3 +5,7 @@ root = true
 dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SA1413.severity = none
+dotnet_diagnostic.SA1649.severity = none
+
+[BPCalculator/Program.cs]
+generated_code = true
