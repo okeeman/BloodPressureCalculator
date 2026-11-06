@@ -337,6 +337,9 @@ jobs:
     needs:
       - zap-baseline
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: Azure Login
