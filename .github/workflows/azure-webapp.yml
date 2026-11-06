@@ -31,7 +31,7 @@ jobs:
         run: dotnet restore
 
       - name: Verify code formatting
-        run: dotnet format --verify-no-changes    
+        run: dotnet format whitespace --verify-no-changes --no-restore
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
