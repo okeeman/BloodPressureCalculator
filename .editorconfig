@@ -1,0 +1,7 @@
+root = true
+
+[*.cs]
+# Disable style rules that don't make sense for modern ASP.NET Core.
+dotnet_diagnostic.SA1200.severity = none
+dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1413.severity = none

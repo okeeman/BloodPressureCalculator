@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-// page model
-
 namespace BPCalculator.Pages
 {
     public class BloodPressureModel : PageModel
