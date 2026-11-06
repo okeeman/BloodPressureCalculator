@@ -9,15 +9,15 @@ namespace BPCalculator
     public enum BPCategory
     {
         /// <summary>Indicates a low blood pressure reading.</summary>
-        [Display(Name= "Low: Consider consulting a healthcare professional if you experience dizziness, fainting, or other symptoms.")]
+        [Display(Name = "Low: Consider consulting a healthcare professional if you experience dizziness, fainting, or other symptoms.")]
         Low,
 
         /// <summary>Indicates an ideal blood pressure reading.</summary>
-        [Display(Name= "Ideal: Maintain your healthy habits and continue regular monitoring.")]
+        [Display(Name = "Ideal: Maintain your healthy habits and continue regular monitoring.")]
         Ideal,
 
         /// <summary>Indicates a pre-high blood pressure reading.</summary>
-        [Display(Name= "Pre-High: Adopt lifestyle changes such as reducing salt intake and increasing physical activity.")]
+        [Display(Name = "Pre-High: Adopt lifestyle changes such as reducing salt intake and increasing physical activity.")]
         PreHigh,
 
         /// <summary>Indicates a high blood pressure reading.</summary>
