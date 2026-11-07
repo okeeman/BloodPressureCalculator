@@ -1,14 +1,8 @@
 namespace BPCalculator
 {
     // Move using statements inside the namespace to avoid potential conflicts with other namespaces.
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
 
     public class Program
     {
