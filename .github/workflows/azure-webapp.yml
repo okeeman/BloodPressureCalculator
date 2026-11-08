@@ -128,21 +128,25 @@ jobs:
           path: codeql-results/*.sarif
           if-no-files-found: warn
 
+
   dependency-check:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
-    steps:  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Run Dependency-Check
         run: |
           docker run --rm \
-          -v ${{ github.workspace }}:/src \
-          -v ${{ github.workspace }}/dependency-check-report:/report \
-          owasp/dependency-check:latest \
-          --scan /src \
-          --format HTML \
-          --out /report
+            -v ${{ github.workspace }}:/src \
+            -v ${{ github.workspace }}/dependency-check-report:/report \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --nvdApiKey ${{ secrets.NVD_API_KEY }} \
+            --format HTML \
+            --format SARIF \
+            --out /report
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
