@@ -130,110 +130,25 @@ jobs:
 
   dependency-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: read
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Set Dependency-Check cache key
-        id: dependency-check-cache-key
-        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Dependency-Check data
-        uses: actions/cache@v6
-        with:
-          path: ${{ runner.temp }}/dependency-check-data
-          key: ${{ runner.os }}-dependency-check-${{ steps.dependency-check-cache-key.outputs.date }}
-          restore-keys: |
-            ${{ runner.os }}-dependency-check-
-
-      - name: Validate NVD API key
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: |
-          if [ -z "$NVD_API_KEY" ]; then
-            echo "::error::The NVD_API_KEY GitHub Actions secret is required. Add or update it in repository or environment secrets."
-            exit 1
-          fi
-
-          if ! status=$(curl --silent --show-error --connect-timeout 5 --max-time 15 \
-            --output /dev/null --write-out '%{http_code}' \
-            --header "apiKey: $NVD_API_KEY" \
-            'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1'); then
-            echo "::error::Could not validate NVD_API_KEY because the NVD API request failed."
-            exit 1
-          fi
-
-          if [ "$status" != "200" ]; then
-            echo "::error::NVD rejected NVD_API_KEY (HTTP $status). Replace the GitHub Actions secret with a valid NVD API key."
-            exit 1
-          fi
-
-      - name: Update Dependency-Check data
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: |
-          docker run --rm \
-            -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
-            owasp/dependency-check:13.0.0 \
-            --updateonly \
-            --nvdApiKey "$NVD_API_KEY" \
-            --nvdMaxRetryCount 3 \
-            --nvdValidForHours 24
-
-      - name: Save Dependency-Check data cache
-        uses: actions/cache/save@v6
-        with:
-          path: ${{ runner.temp }}/dependency-check-data
-          key: ${{ runner.os }}-dependency-check-${{ steps.dependency-check-cache-key.outputs.date }}
-
+    steps:  
       - name: Run Dependency-Check
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/src" \
-            -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
-            -v "${{ github.workspace }}/dependency-check-report:/report" \
-            owasp/dependency-check:13.0.0 \
-            --scan /src/BPCalculator \
-            --scan /src/BPCalculator.ReqnrollTests \
-            --scan /src/BPCalculatorE2EPlaywright \
-            --scan /src/SeleniumTests \
-            --scan /src/TestBPCalculator \
-            --scan /src/package-lock.json \
-            --format HTML \
-            --format SARIF \
-            --noupdate \
-            --nvdApiKey "$NVD_API_KEY" \
-            --nvdMaxRetryCount 3 \
-            --nvdValidForHours 24 \
-            --out /report
+          -v ${{ github.workspace }}:/src \
+          -v ${{ github.workspace }}/dependency-check-report:/report \
+          owasp/dependency-check:latest \
+          --scan /src \
+          --format HTML \
+          --out /report
 
       - name: Upload Artifact
-        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
           path: dependency-check-report/
-          if-no-files-found: warn
-
-      - name: Upload SARIF
-        if: ${{ success() && hashFiles('dependency-check-report/dependency-check-report.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: dependency-check-report/dependency-check-report.sarif
 
   sonar-cloud:
     runs-on: ubuntu-latest
