@@ -145,6 +145,18 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Set Dependency-Check cache key
+        id: dependency-check-cache-key
+        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Dependency-Check data
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/dependency-check-data
+          key: ${{ runner.os }}-dependency-check-${{ steps.dependency-check-cache-key.outputs.date }}
+          restore-keys: |
+            ${{ runner.os }}-dependency-check-
+
       - name: Run Dependency-Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
@@ -154,23 +166,41 @@ jobs:
             exit 1
           fi
 
-          docker run --rm \
-          -v ${{ github.workspace }}:/src \
-          -v ${{ github.workspace }}/dependency-check-report:/report \
-          owasp/dependency-check:latest \
-          --scan /src \
-          --format HTML \
-          --format SARIF \
-          --nvdApiKey "$NVD_API_KEY" \
-          --out /report
+          for attempt in 1 2 3; do
+            if docker run --rm \
+              -v "${{ github.workspace }}:/src" \
+              -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
+              -v "${{ github.workspace }}/dependency-check-report:/report" \
+              owasp/dependency-check:13.0.0 \
+              --scan /src \
+              --format HTML \
+              --format SARIF \
+              --nvdApiKey "$NVD_API_KEY" \
+              --nvdMaxRetryCount 10 \
+              --nvdValidForHours 24 \
+              --out /report; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "Dependency-Check failed on attempt $attempt; retrying in $((attempt * 30)) seconds."
+              sleep $((attempt * 30))
+            fi
+          done
+
+          echo "::error::Dependency-Check failed after 3 attempts."
+          exit 1
 
       - name: Upload Artifact
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
           path: dependency-check-report/
+          if-no-files-found: warn
 
       - name: Upload SARIF
+        if: ${{ success() && hashFiles('dependency-check-report/dependency-check-report.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: dependency-check-report/dependency-check-report.sarif
