@@ -34,7 +34,7 @@ namespace BPCalculator.Pages
             // extra validation
             if (!(this.BP.Systolic > this.BP.Diastolic))
             {
-                this.ModelState.AddModelError("", "Systolic must be greater than Diastolic");
+                this.ModelState.AddModelError(string.Empty, "Systolic must be greater than Diastolic");
             }
 
             return this.Page();

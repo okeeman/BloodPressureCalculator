@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
@@ -32,7 +32,7 @@ jobs:
         run: dotnet restore
 
       - name: Verify code formatting
-        run: dotnet format whitespace --verify-no-changes --no-restore
+        run: dotnet format --verify-no-changes --no-restore
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
@@ -41,7 +41,7 @@ jobs:
         run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output publish
 
       - name: Upload build outputs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-output
           path: |
@@ -51,7 +51,7 @@ jobs:
           retention-days: 1
 
       - name: Upload web app package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: webapp-package
           path: publish/
@@ -66,10 +66,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
@@ -83,7 +83,7 @@ jobs:
         run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release --coverage --coverage-output "${{ github.workspace }}/coverage/reqnroll.cobertura.xml" --coverage-output-format cobertura
 
       - name: Upload C# coverage reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: csharp-coverage
           path: coverage/*.cobertura.xml
@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download build outputs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: build-output
           path: .
@@ -122,7 +122,7 @@ jobs:
 
       - name: Upload CodeQL results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: codeql-results
           path: codeql-results/*.sarif
@@ -135,34 +135,37 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Scan dependencies with OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c
-        with:
-          project: BloodPressureCalculator
-          path: .
-          format: HTML
-          out: reports
-          args: >
-            --failOnCVSS 7
+      - name: Run Dependency-Check
+        run: |
+          docker run --rm \
+          -v ${{ github.workspace }}:/src \
+          -v ${{ github.workspace }}/dependency-check-report:/report \
+          owasp/dependency-check:latest \
+          --scan /src \
+          --format HTML \
+          --format SARIF \
+          --out /report
 
-      - name: Upload Dependency-Check report
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
-        if: ${{ always() }}
         with:
           name: dependency-check-report
-          path: reports/
-          if-no-files-found: warn
-          retention-days: 30
+          path: dependency-check-report/
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: dependency-check-report/dependency-check-report.sarif
 
   sonar-cloud:
     runs-on: ubuntu-latest
@@ -174,7 +177,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download build outputs
         uses: actions/download-artifact@v4
@@ -189,7 +192,7 @@ jobs:
           path: coverage
 
       - name: Analyze code with SonarCloud
-        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65
         with:
           args: >
             -Dsonar.organization=okeeman
@@ -216,7 +219,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download web app package
         uses: actions/download-artifact@v4
@@ -225,7 +228,7 @@ jobs:
           path: publish
 
       - name: Sign in to Azure
-        uses: azure/login@8216e11d8cd9b42fe925c852af8e76311ff067ac
+        uses: azure/login@053f7285eb20bf5469ef084617b0b24d3cec53fc
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -258,10 +261,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
@@ -278,15 +281,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: lts/*
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
@@ -304,7 +307,7 @@ jobs:
           BASE_URL: ${{ env.STAGING_URI }}
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: playwright-report
@@ -322,7 +325,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up k6
         uses: grafana/setup-k6-action@v1
@@ -353,7 +356,7 @@ jobs:
         run: docker run --rm -v "${{ github.workspace }}/zap-report:/zap/wrk/:rw" --user root -t zaproxy/zap-weekly zap-baseline.py -t "${{ env.URI }}" -I -r zapreport.html
 
       - name: Upload ZAP report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: ZAPreport
@@ -371,7 +374,7 @@ jobs:
 
     steps:
     - name: Azure Login
-      uses: azure/login@8216e11d8cd9b42fe925c852af8e76311ff067ac
+      uses: azure/login@053f7285eb20bf5469ef084617b0b24d3cec53fc
       with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
