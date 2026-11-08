@@ -103,7 +103,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Download build outputs
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: build-output
           path: .
@@ -131,30 +131,38 @@ jobs:
 
   dependency-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-      - name: Create report directory
-        run: mkdir -p dependency-check-report
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
 
-      - name: Run Dependency-Check
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/src \
-            -v ${{ github.workspace }}/dependency-check-report:/report \
-            owasp/dependency-check:latest \
-            --scan /src \
-            --format HTML \
-            --log /report/dependency-check.log \
-            --out /report
+      - name: Restore dependencies
+        run: dotnet restore
 
-      - name: Upload Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Scan dependencies with OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c
+        with:
+          project: BloodPressureCalculator
+          path: .
+          format: HTML
+          out: reports
+          args: >
+            --failOnCVSS 7
+      - name: Upload Dependency-Check report
+        uses: actions/upload-artifact@v7
+        if: ${{ always() }}
         with:
           name: dependency-check-report
-          path: dependency-check-report/
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 30
 
   sonar-cloud:
     runs-on: ubuntu-latest
@@ -169,13 +177,13 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Download build outputs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-output
           path: .
 
       - name: Download C# coverage reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: csharp-coverage
           path: coverage
@@ -211,7 +219,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Download web app package
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: webapp-package
           path: publish
