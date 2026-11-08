@@ -130,6 +130,7 @@ jobs:
 
   dependency-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
 
@@ -157,39 +158,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dependency-check-
 
-      - name: Run Dependency-Check
+      - name: Validate NVD API key
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           if [ -z "$NVD_API_KEY" ]; then
-            echo "::error::The NVD_API_KEY GitHub Actions secret is required. Add it in repository or environment secrets."
+            echo "::error::The NVD_API_KEY GitHub Actions secret is required. Add or update it in repository or environment secrets."
             exit 1
           fi
 
-          for attempt in 1 2 3; do
-            if docker run --rm \
-              -v "${{ github.workspace }}:/src" \
-              -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
-              -v "${{ github.workspace }}/dependency-check-report:/report" \
-              owasp/dependency-check:13.0.0 \
-              --scan /src \
-              --format HTML \
-              --format SARIF \
-              --nvdApiKey "$NVD_API_KEY" \
-              --nvdMaxRetryCount 10 \
-              --nvdValidForHours 24 \
-              --out /report; then
-              exit 0
-            fi
+          if ! status=$(curl --silent --show-error --connect-timeout 5 --max-time 15 \
+            --output /dev/null --write-out '%{http_code}' \
+            --header "apiKey: $NVD_API_KEY" \
+            'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1'); then
+            echo "::error::Could not validate NVD_API_KEY because the NVD API request failed."
+            exit 1
+          fi
 
-            if [ "$attempt" -lt 3 ]; then
-              echo "Dependency-Check failed on attempt $attempt; retrying in $((attempt * 30)) seconds."
-              sleep $((attempt * 30))
-            fi
-          done
+          if [ "$status" != "200" ]; then
+            echo "::error::NVD rejected NVD_API_KEY (HTTP $status). Replace the GitHub Actions secret with a valid NVD API key."
+            exit 1
+          fi
 
-          echo "::error::Dependency-Check failed after 3 attempts."
-          exit 1
+      - name: Run Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/src" \
+            -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
+            -v "${{ github.workspace }}/dependency-check-report:/report" \
+            owasp/dependency-check:13.0.0 \
+            --scan /src \
+            --format HTML \
+            --format SARIF \
+            --nvdApiKey "$NVD_API_KEY" \
+            --nvdMaxRetryCount 3 \
+            --nvdValidForHours 24 \
+            --out /report
 
       - name: Upload Artifact
         if: ${{ always() }}
