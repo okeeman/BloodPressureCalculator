@@ -180,6 +180,24 @@ jobs:
             exit 1
           fi
 
+      - name: Update Dependency-Check data
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          docker run --rm \
+            -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
+            owasp/dependency-check:13.0.0 \
+            --updateonly \
+            --nvdApiKey "$NVD_API_KEY" \
+            --nvdMaxRetryCount 3 \
+            --nvdValidForHours 24
+
+      - name: Save Dependency-Check data cache
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/dependency-check-data
+          key: ${{ runner.os }}-dependency-check-${{ steps.dependency-check-cache-key.outputs.date }}
+
       - name: Run Dependency-Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
@@ -189,9 +207,15 @@ jobs:
             -v "${{ runner.temp }}/dependency-check-data:/usr/share/dependency-check/data" \
             -v "${{ github.workspace }}/dependency-check-report:/report" \
             owasp/dependency-check:13.0.0 \
-            --scan /src \
+            --scan /src/BPCalculator \
+            --scan /src/BPCalculator.ReqnrollTests \
+            --scan /src/BPCalculatorE2EPlaywright \
+            --scan /src/SeleniumTests \
+            --scan /src/TestBPCalculator \
+            --scan /src/package-lock.json \
             --format HTML \
             --format SARIF \
+            --noupdate \
             --nvdApiKey "$NVD_API_KEY" \
             --nvdMaxRetryCount 3 \
             --nvdValidForHours 24 \
