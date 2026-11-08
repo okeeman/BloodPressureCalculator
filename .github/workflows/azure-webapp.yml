@@ -146,7 +146,14 @@ jobs:
         run: dotnet restore
 
       - name: Run Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
+          if [ -z "$NVD_API_KEY" ]; then
+            echo "::error::The NVD_API_KEY GitHub Actions secret is required. Add it in repository or environment secrets."
+            exit 1
+          fi
+
           docker run --rm \
           -v ${{ github.workspace }}:/src \
           -v ${{ github.workspace }}/dependency-check-report:/report \
@@ -154,6 +161,7 @@ jobs:
           --scan /src \
           --format HTML \
           --format SARIF \
+          --nvdApiKey "$NVD_API_KEY" \
           --out /report
 
       - name: Upload Artifact
