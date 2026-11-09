@@ -20,5 +20,19 @@ test("classifies readings into every blood pressure category", async ({ page }) 
     await expect(page.getByRole("heading", { level: 4 })).toContainText(
       `${reading.category}:`,
     );
+    const layout = await page.evaluate(() => {
+      const advice = document.querySelector(".bp-advice")?.getBoundingClientRect();
+
+      return {
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+        adviceLeft: advice?.left,
+        adviceRight: advice?.right,
+      };
+    });
+
+    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth);
+    expect(layout.adviceLeft).toBeGreaterThanOrEqual(0);
+    expect(layout.adviceRight).toBeLessThanOrEqual(layout.viewportWidth);
   }
 });

@@ -27,10 +27,10 @@ export default defineConfig({
       process.env.BASE_URL ??
       'https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/',
 
-    // Collect trace when retrying the failed test.
-    trace: 'on-first-retry',
+    // Collect a trace for every test run.
+    trace: 'on',
   },
-  // Configure projects for major browsers.
+  // Configure projects for major browsers and a mobile device.
   projects: [
     {
       name: 'chromium',
@@ -43,6 +43,10 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'mobile-chromium',
+      use: { ...devices['Pixel 7'] },
     },
   ],
 });
