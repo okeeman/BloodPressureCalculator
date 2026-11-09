@@ -350,7 +350,7 @@ jobs:
         run: docker pull zaproxy/zap-weekly
 
       - name: Run baseline scan
-        run: docker run --rm -v "${{ github.workspace }}/zap-report:/zap/wrk/:rw" --user root -t zaproxy/zap-weekly zap-baseline.py -t "${{ env.URI }}" -I -r zapreport.html
+        run: docker run --rm -v "${{ github.workspace }}/zap-report:/zap/wrk/:rw" --user root -t zaproxy/zap-weekly zap-baseline.py -t "${{ env.STAGING_URI }}" -I -r zapreport.html
 
       - name: Upload ZAP report
         uses: actions/upload-artifact@v7
