@@ -54,6 +54,14 @@ namespace BPCalculator
                 app.UseExceptionHandler("/Error");
             }
 
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers["Content-Security-Policy"] =
+                    "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:";
+                context.Response.Headers["X-Frame-Options"] = "DENY";
+                await next();
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
