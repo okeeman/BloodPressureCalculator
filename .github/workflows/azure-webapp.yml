@@ -69,6 +69,48 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  dependency-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Scan dependencies with OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c
+        with:
+          project: BloodPressureCalculator
+          path: .
+          format: HTML
+          out: reports
+          args: >
+            --failOnCVSS 7
+      - name: Upload Dependency-Check report
+        uses: actions/upload-artifact@v7
+        if: ${{ always() }}
+        with:
+          name: dependency-check-report
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Generate SBOM
+        run: |
+          dotnet tool install --global CycloneDX
+          dotnet-CycloneDX MySolution.sln \
+          -o sbom
+
+
   unit-acceptance-tests:
     runs-on: ubuntu-latest
     needs: lint-build
@@ -139,59 +181,6 @@ jobs:
           path: codeql-results/*.sarif
           if-no-files-found: warn
 
-
-  dependency-check:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Scan dependencies with OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c
-        with:
-          project: BloodPressureCalculator
-          path: .
-          format: HTML
-          out: reports
-          args: >
-            --failOnCVSS 7
-      - name: Upload Dependency-Check report
-        uses: actions/upload-artifact@v7
-        if: ${{ always() }}
-        with:
-          name: dependency-check-report
-          path: reports/
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-
-      - name: Install LicenseFinder
-        run: gem install license_finder
-
-      - name: Generate licence report
-        run: |
-          license_finder report --format csv > licence-report.csv
-
-      - name: Upload licence report
-        uses: actions/upload-artifact@v4
-        with:
-          name: licence-report
-          path: licence-report.csv
 
   sonar-cloud:
     runs-on: ubuntu-latest
@@ -379,7 +368,15 @@ jobs:
         run: docker pull zaproxy/zap-weekly
 
       - name: Run baseline scan
-        run: docker run --rm -v "${{ github.workspace }}/zap-report:/zap/wrk/:rw" --user root -t zaproxy/zap-weekly zap-baseline.py -t "${{ env.STAGING_URI }}" -I -r zapreport.html
+        run: |
+          docker run --rm \
+          -v "${{ github.workspace }}/zap-report:/zap/wrk/:rw" \
+          --user root \
+          -t zaproxy/zap-weekly \
+          zap-baseline.py \
+          -t "${{ env.STAGING_URI }}" \
+          -I \
+          -r zapreport.html
 
       - name: Upload ZAP report
         uses: actions/upload-artifact@v7
