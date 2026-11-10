@@ -1,3 +1,4 @@
+param location string = resourceGroup().location
 param sites_BloodPressureWebApp_name string = 'BloodPressureWebApp'
 param components_BloodPressureWebApp_name string = 'BloodPressureWebApp'
 param serverfarms_ASP_BloodPressureResourceGroup_b8ae_name string = 'ASP-BloodPressureResourceGroup-b8ae'
@@ -37,7 +38,7 @@ resource actionGroups_Application_Insights_Smart_Detection_name_resource 'micros
 
 resource components_BloodPressureWebApp_name_resource 'microsoft.insights/components@2020-02-02' = {
   name: components_BloodPressureWebApp_name
-  location: 'francecentral'
+  location: location
   kind: 'web'
   properties: {
     Application_Type: 'web'
@@ -53,7 +54,7 @@ resource components_BloodPressureWebApp_name_resource 'microsoft.insights/compon
 
 resource serverfarms_ASP_BloodPressureResourceGroup_b8ae_name_resource 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: serverfarms_ASP_BloodPressureResourceGroup_b8ae_name
-  location: 'France Central'
+  location: location
   sku: {
     name: 'P0v3'
     tier: 'Premium0V3'
@@ -80,7 +81,7 @@ resource serverfarms_ASP_BloodPressureResourceGroup_b8ae_name_resource 'Microsof
 resource components_BloodPressureWebApp_name_degradationindependencyduration 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'degradationindependencyduration'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'degradationindependencyduration'
@@ -101,7 +102,7 @@ resource components_BloodPressureWebApp_name_degradationindependencyduration 'mi
 resource components_BloodPressureWebApp_name_degradationinserverresponsetime 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'degradationinserverresponsetime'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'degradationinserverresponsetime'
@@ -122,7 +123,7 @@ resource components_BloodPressureWebApp_name_degradationinserverresponsetime 'mi
 resource components_BloodPressureWebApp_name_digestMailConfiguration 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'digestMailConfiguration'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'digestMailConfiguration'
@@ -143,7 +144,7 @@ resource components_BloodPressureWebApp_name_digestMailConfiguration 'microsoft.
 resource components_BloodPressureWebApp_name_extension_billingdatavolumedailyspikeextension 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'extension_billingdatavolumedailyspikeextension'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'extension_billingdatavolumedailyspikeextension'
@@ -164,7 +165,7 @@ resource components_BloodPressureWebApp_name_extension_billingdatavolumedailyspi
 resource components_BloodPressureWebApp_name_extension_canaryextension 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'extension_canaryextension'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'extension_canaryextension'
@@ -185,7 +186,7 @@ resource components_BloodPressureWebApp_name_extension_canaryextension 'microsof
 resource components_BloodPressureWebApp_name_extension_exceptionchangeextension 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'extension_exceptionchangeextension'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'extension_exceptionchangeextension'
@@ -206,7 +207,7 @@ resource components_BloodPressureWebApp_name_extension_exceptionchangeextension 
 resource components_BloodPressureWebApp_name_extension_memoryleakextension 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'extension_memoryleakextension'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'extension_memoryleakextension'
@@ -227,7 +228,7 @@ resource components_BloodPressureWebApp_name_extension_memoryleakextension 'micr
 resource components_BloodPressureWebApp_name_extension_securityextensionspackage 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'extension_securityextensionspackage'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'extension_securityextensionspackage'
@@ -248,7 +249,7 @@ resource components_BloodPressureWebApp_name_extension_securityextensionspackage
 resource components_BloodPressureWebApp_name_extension_traceseveritydetector 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'extension_traceseveritydetector'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'extension_traceseveritydetector'
@@ -269,7 +270,7 @@ resource components_BloodPressureWebApp_name_extension_traceseveritydetector 'mi
 resource components_BloodPressureWebApp_name_longdependencyduration 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'longdependencyduration'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'longdependencyduration'
@@ -290,7 +291,7 @@ resource components_BloodPressureWebApp_name_longdependencyduration 'microsoft.i
 resource components_BloodPressureWebApp_name_migrationToAlertRulesCompleted 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'migrationToAlertRulesCompleted'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'migrationToAlertRulesCompleted'
@@ -311,7 +312,7 @@ resource components_BloodPressureWebApp_name_migrationToAlertRulesCompleted 'mic
 resource components_BloodPressureWebApp_name_slowpageloadtime 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'slowpageloadtime'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'slowpageloadtime'
@@ -332,7 +333,7 @@ resource components_BloodPressureWebApp_name_slowpageloadtime 'microsoft.insight
 resource components_BloodPressureWebApp_name_slowserverresponsetime 'microsoft.insights/components/ProactiveDetectionConfigs@2018-05-01-preview' = {
   parent: components_BloodPressureWebApp_name_resource
   name: 'slowserverresponsetime'
-  location: 'francecentral'
+  location: location
   properties: {
     ruleDefinitions: {
       Name: 'slowserverresponsetime'
@@ -352,7 +353,7 @@ resource components_BloodPressureWebApp_name_slowserverresponsetime 'microsoft.i
 
 resource sites_BloodPressureWebApp_name_resource 'Microsoft.Web/sites@2024-11-01' = {
   name: sites_BloodPressureWebApp_name
-  location: 'France Central'
+  location: location
   tags: {
     'hidden-link: /app-insights-resource-id': '/subscriptions/e232d8a4-58da-4305-a691-d5575e3f56b9/resourceGroups/BloodPressureResourceGroup/providers/microsoft.insights/components/BloodPressureWebApp'
   }
@@ -415,7 +416,7 @@ resource sites_BloodPressureWebApp_name_resource 'Microsoft.Web/sites@2024-11-01
 resource sites_BloodPressureWebApp_name_ftp 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2024-11-01' = {
   parent: sites_BloodPressureWebApp_name_resource
   name: 'ftp'
-  location: 'France Central'
+  location: location
   tags: {
     'hidden-link: /app-insights-resource-id': '/subscriptions/e232d8a4-58da-4305-a691-d5575e3f56b9/resourceGroups/BloodPressureResourceGroup/providers/microsoft.insights/components/BloodPressureWebApp'
   }
@@ -427,7 +428,7 @@ resource sites_BloodPressureWebApp_name_ftp 'Microsoft.Web/sites/basicPublishing
 resource sites_BloodPressureWebApp_name_scm 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2024-11-01' = {
   parent: sites_BloodPressureWebApp_name_resource
   name: 'scm'
-  location: 'France Central'
+  location: location
   tags: {
     'hidden-link: /app-insights-resource-id': '/subscriptions/e232d8a4-58da-4305-a691-d5575e3f56b9/resourceGroups/BloodPressureResourceGroup/providers/microsoft.insights/components/BloodPressureWebApp'
   }
@@ -439,7 +440,7 @@ resource sites_BloodPressureWebApp_name_scm 'Microsoft.Web/sites/basicPublishing
 resource sites_BloodPressureWebApp_name_web 'Microsoft.Web/sites/config@2024-11-01' = {
   parent: sites_BloodPressureWebApp_name_resource
   name: 'web'
-  location: 'France Central'
+  location: location
   tags: {
     'hidden-link: /app-insights-resource-id': '/subscriptions/e232d8a4-58da-4305-a691-d5575e3f56b9/resourceGroups/BloodPressureResourceGroup/providers/microsoft.insights/components/BloodPressureWebApp'
   }
@@ -523,7 +524,7 @@ resource sites_BloodPressureWebApp_name_web 'Microsoft.Web/sites/config@2024-11-
 resource sites_BloodPressureWebApp_name_b0d827b8_ccd0_4b22_ae36_c50f1026b92d 'Microsoft.Web/sites/deployments@2024-11-01' = {
   parent: sites_BloodPressureWebApp_name_resource
   name: 'b0d827b8-ccd0-4b22-ae36-c50f1026b92d'
-  location: 'France Central'
+  location: location
   properties: {
     status: 4
     author_email: 'N/A'
@@ -539,7 +540,7 @@ resource sites_BloodPressureWebApp_name_b0d827b8_ccd0_4b22_ae36_c50f1026b92d 'Mi
 resource sites_BloodPressureWebApp_name_sites_BloodPressureWebApp_name_hnd9b7dafpfeawa7_francecentral_01_azurewebsites_net 'Microsoft.Web/sites/hostNameBindings@2024-11-01' = {
   parent: sites_BloodPressureWebApp_name_resource
   name: '${sites_BloodPressureWebApp_name}-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net'
-  location: 'France Central'
+  location: location
   properties: {
     siteName: 'BloodPressureWebApp'
     hostNameType: 'Verified'

@@ -10,7 +10,6 @@ env:
   ACTIONS_STEP_DEBUG: true
   ACTIONS_RUNNER_DEBUG: true
   AZURE_RESOURCE_GROUP: BloodPressureResourceGroup
-  URI: https://bloodpressurewebapp-hnd9b7dafpfeawa7.francecentral-01.azurewebsites.net/
   STAGING_URI: https://bloodpressurewebapp-staging-dkf8e2c5eyarfmdp.francecentral-01.azurewebsites.net/
 
 jobs:
@@ -163,6 +162,28 @@ jobs:
           path: reports/
           if-no-files-found: warn
           retention-days: 30
+
+  license-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install LicenseFinder
+        run: gem install license_finder
+
+      - name: Generate licence report
+        run: |
+          license_finder report --format csv > licence-report.csv
+
+      - name: Upload licence report
+        uses: actions/upload-artifact@v4
+        with:
+          name: licence-report
+          path: licence-report.csv
 
   sonar-cloud:
     runs-on: ubuntu-latest
