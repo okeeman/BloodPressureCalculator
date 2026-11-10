@@ -110,6 +110,14 @@ jobs:
           dotnet-CycloneDX BPCalculator.sln \
           -o sbom
 
+      - name: Upload SBOM Reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: cyclonedx-reports
+          path: |
+            sbom/*.json
+            sbom/*.xml
+
 
   unit-acceptance-tests:
     runs-on: ubuntu-latest
