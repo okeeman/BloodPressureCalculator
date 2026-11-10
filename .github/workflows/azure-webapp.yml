@@ -107,7 +107,7 @@ jobs:
       - name: Generate SBOM
         run: |
           dotnet tool install --global CycloneDX
-          dotnet-CycloneDX MySolution.sln \
+          dotnet-CycloneDX BPCalculator.sln \
           -o sbom
 
 
