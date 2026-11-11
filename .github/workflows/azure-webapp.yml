@@ -106,19 +106,23 @@ jobs:
 
       - name: Install licence checking tool
         run: |
-          dotnet tool install --global dotnet-project-licenses
+          dotnet tool install --global nuget-license --version 4.0.18
 
-      - name: Generate license CSV report
+      - name: Generate license JSON report
         run: |
-          dotnet-project-licenses \
+          nuget-license \
           --input BPCalculator.sln \
-          --outfile licenses.csv
+          --include-transitive \
+          --output JsonPretty \
+          --file-output licenses.json
 
-      - name: Convert CSV to HTML
+      - name: Convert license JSON to CSV and HTML
         shell: pwsh
         run: |
-          $csv = Import-Csv licenses.csv
-          $csv | ConvertTo-Html `
+          $licenses = Get-Content licenses.json -Raw | ConvertFrom-Json
+          $licenseRows = $licenses | Select-Object PackageId, PackageVersion, License, LicenseUrl
+          $licenseRows | Export-Csv -Path licenses.csv -NoTypeInformation
+          $licenseRows | ConvertTo-Html `
           -Title "NuGet Licenses" |
            Out-File licenses.html
       
