@@ -36,6 +36,17 @@ resource webApp 'Microsoft.Web/sites@2024-11-01' = {
   }
 }
 
+// The public blood pressure calculator intentionally allows anonymous access.
+resource webAppAuthSettings 'Microsoft.Web/sites/config@2024-11-01' = {
+  parent: webApp
+  name: 'authsettingsV2'
+  properties: {
+    platform: {
+      enabled: false
+    }
+  }
+}
+
 resource stagingSlot 'Microsoft.Web/sites/slots@2024-11-01' = {
   parent: webApp
   name: stagingSlotName
@@ -47,6 +58,16 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2024-11-01' = {
       alwaysOn: true
       ftpsState: 'Disabled'
       linuxFxVersion: 'DOTNETCORE|${dotnetVersion}'
+    }
+  }
+}
+
+resource stagingSlotAuthSettings 'Microsoft.Web/sites/slots/config@2024-11-01' = {
+  parent: stagingSlot
+  name: 'authsettingsV2'
+  properties: {
+    platform: {
+      enabled: false
     }
   }
 }
