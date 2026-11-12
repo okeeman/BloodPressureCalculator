@@ -8,6 +8,7 @@ a.navbar-brand {
 }
 
 .bp-advice {
+  display: inline-block;
   max-width: 100%;
   white-space: normal;
   overflow-wrap: anywhere;

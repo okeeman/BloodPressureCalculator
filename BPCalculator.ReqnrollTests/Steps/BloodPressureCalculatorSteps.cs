@@ -9,6 +9,10 @@ namespace BPCalculator.ReqnrollTests.Steps;
 public sealed class BloodPressureCalculatorSteps
 {
     private static readonly WebApplicationFactory<Program> Application = new();
+    private static readonly Regex CategoryBadge = new(
+        "<span\\b(?=[^>]*\\bclass=\"[^\"]*\\bbp-category\\b[^\"]*\")[^>]*>(?<text>.*?)</span>",
+        RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+
     private HttpClient? _client;
     private string? _page;
     private string? _antiforgeryToken;
@@ -43,11 +47,16 @@ public sealed class BloodPressureCalculatorSteps
         _page = await response.Content.ReadAsStringAsync();
     }
 
-    [Then("the page displays {string}")]
-    public void ThenThePageDisplays(string expectedText)
+    [Then("the page displays category {string} followed by advice {string}")]
+    public void ThenThePageDisplaysCategoryFollowedByAdvice(string expectedCategory, string expectedAdvice)
     {
         Assert.IsNotNull(_page);
-        StringAssert.Contains(_page, expectedText);
+
+        var match = CategoryBadge.Match(_page);
+        Assert.IsTrue(match.Success, "Expected the displayed category text to include the advice.");
+
+        var expectedText = NormalizeDisplayedText($"{expectedCategory} {expectedAdvice}");
+        Assert.AreEqual(expectedText, NormalizeDisplayedText(match.Groups["text"].Value));
     }
 
     [Then("the page displays the validation error {string}")]
@@ -83,5 +92,10 @@ public sealed class BloodPressureCalculatorSteps
         }
 
         return WebUtility.HtmlDecode(value.Groups[1].Value);
+    }
+
+    private static string NormalizeDisplayedText(string value)
+    {
+        return WebUtility.HtmlDecode(Regex.Replace(value, @"\s+", " ").Trim());
     }
 }

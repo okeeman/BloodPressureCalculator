@@ -18,7 +18,7 @@ namespace BPCalculator.ReqnrollTests.Features
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute()]
-    public partial class BloodPressureCategoryCalculatorFeature
+    public partial class Category_SpecificBloodPressureAdviceFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
@@ -27,8 +27,9 @@ namespace BPCalculator.ReqnrollTests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Blood pressure category calculator", "  As a visitor to the calculator\r\n  I want to submit blood pressure readings\r\n  S" +
-                "o that I can see their category and get feedback for invalid readings", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Category-specific blood pressure advice", "  As a health-conscious user\r\n  I want to see advice next to my blood pressure ca" +
+                "tegory\r\n  So that I understand what actions I can take to maintain or improve my" +
+                " health", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "BloodPressureCalculator.feature"
 #line hidden
@@ -130,31 +131,33 @@ namespace BPCalculator.ReqnrollTests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/BloodPressureCalculator.feature.ndjson", 8);
         }
         
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute(callerLineNumber: 9, DisplayName="A valid reading displays its blood pressure category")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("A valid reading displays its blood pressure category")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "Blood pressure category calculator")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("85", "55", "Low: Consider consulting a healthcare professional if you experience dizziness, f" +
-            "ainting, or other symptoms.", "0", null, DisplayName="A valid reading displays its blood pressure category(85,55,Low: Consider consulti" +
-            "ng a healthcare professional if you experience dizziness, fainting, or other sym" +
-            "ptoms.,0)")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("110", "70", "Ideal: Maintain your healthy habits and continue regular monitoring.", "1", null, DisplayName="A valid reading displays its blood pressure category(110,70,Ideal: Maintain your " +
-            "healthy habits and continue regular monitoring.,1)")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("120", "80", "Pre-High: Adopt lifestyle changes such as reducing salt intake and increasing phy" +
-            "sical activity.", "2", null, DisplayName="A valid reading displays its blood pressure category(120,80,Pre-High: Adopt lifes" +
-            "tyle changes such as reducing salt intake and increasing physical activity.,2)")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("140", "90", "High: Consult a healthcare professional about managing your blood pressure and re" +
-            "ducing health risks.", "3", null, DisplayName="A valid reading displays its blood pressure category(140,90,High: Consult a healt" +
-            "hcare professional about managing your blood pressure and reducing health risks." +
-            ",3)")]
-        public async global::System.Threading.Tasks.Task AValidReadingDisplaysItsBloodPressureCategory(string systolic, string diastolic, string category, string @__pickleIndex, string[] exampleTags)
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute(callerLineNumber: 9, DisplayName="A valid reading displays advice immediately after its category")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("A valid reading displays advice immediately after its category")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "Category-specific blood pressure advice")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("85", "55", "Low:", "Consider consulting a healthcare professional if you experience dizziness, fainti" +
+            "ng, or other symptoms.", "0", null, DisplayName="A valid reading displays advice immediately after its category(85,55,Low:,Conside" +
+            "r consulting a healthcare professional if you experience dizziness, fainting, or" +
+            " other symptoms.,0)")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("110", "70", "Ideal:", "Maintain your healthy habits and continue regular monitoring.", "1", null, DisplayName="A valid reading displays advice immediately after its category(110,70,Ideal:,Main" +
+            "tain your healthy habits and continue regular monitoring.,1)")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("120", "80", "Pre-High:", "Adopt lifestyle changes such as reducing salt intake and increasing physical acti" +
+            "vity.", "2", null, DisplayName="A valid reading displays advice immediately after its category(120,80,Pre-High:,A" +
+            "dopt lifestyle changes such as reducing salt intake and increasing physical acti" +
+            "vity.,2)")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute("140", "90", "High:", "Consult a healthcare professional about managing your blood pressure and reducing" +
+            " health risks.", "3", null, DisplayName="A valid reading displays advice immediately after its category(140,90,High:,Consu" +
+            "lt a healthcare professional about managing your blood pressure and reducing hea" +
+            "lth risks.,3)")]
+        public async global::System.Threading.Tasks.Task AValidReadingDisplaysAdviceImmediatelyAfterItsCategory(string systolic, string diastolic, string category, string advice, string @__pickleIndex, string[] exampleTags)
         {
             string[] tagsOfScenario = exampleTags;
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             argumentsOfScenario.Add("systolic", systolic);
             argumentsOfScenario.Add("diastolic", diastolic);
             argumentsOfScenario.Add("category", category);
+            argumentsOfScenario.Add("advice", advice);
             string pickleIndex = @__pickleIndex;
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A valid reading displays its blood pressure category", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A valid reading displays advice immediately after its category", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 9
@@ -174,7 +177,7 @@ namespace BPCalculator.ReqnrollTests.Features
     await testRunner.WhenAsync(string.Format("I submit a reading with systolic {0} and diastolic {1}", systolic, diastolic), ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 11
-    await testRunner.ThenAsync(string.Format("the page displays \"{0}\"", category), ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync(string.Format("the page displays category \"{0}\" followed by advice \"{1}\"", category, advice), ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -182,7 +185,7 @@ namespace BPCalculator.ReqnrollTests.Features
         
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute(callerLineNumber: 20, DisplayName="A systolic reading that is not greater than diastolic is rejected")]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("A systolic reading that is not greater than diastolic is rejected")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "Blood pressure category calculator")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "Category-specific blood pressure advice")]
         public async global::System.Threading.Tasks.Task ASystolicReadingThatIsNotGreaterThanDiastolicIsRejected()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -216,7 +219,7 @@ namespace BPCalculator.ReqnrollTests.Features
         
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute(callerLineNumber: 24, DisplayName="A reading outside the accepted range is rejected")]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.DescriptionAttribute("A reading outside the accepted range is rejected")]
-        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "Blood pressure category calculator")]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("FeatureTitle", "Category-specific blood pressure advice")]
         public async global::System.Threading.Tasks.Task AReadingOutsideTheAcceptedRangeIsRejected()
         {
             string[] tagsOfScenario = ((string[])(null));
