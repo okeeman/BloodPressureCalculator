@@ -26,6 +26,7 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
+          cache: true
 
       - name: Restore dependencies
         run: dotnet restore
@@ -48,9 +49,6 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Publish
-        run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output publish
-
       - name: Upload build outputs
         uses: actions/upload-artifact@v7
         with:
@@ -60,6 +58,9 @@ jobs:
             **/obj/**
           if-no-files-found: error
           retention-days: 1
+
+      - name: Publish
+        run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output publish
 
       - name: Upload web app package
         uses: actions/upload-artifact@v7
@@ -82,6 +83,7 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
+          cache: true
 
       - name: Restore dependencies
         run: dotnet restore
@@ -95,6 +97,7 @@ jobs:
           out: reports
           args: >
             --failOnCVSS 7
+            
       - name: Upload Dependency-Check report
         uses: actions/upload-artifact@v7
         if: ${{ always() }}
