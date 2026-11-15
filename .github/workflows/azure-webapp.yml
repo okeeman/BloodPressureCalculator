@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload Bicep report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bicep-lint-report
           path: bicep-lint-report.txt
@@ -128,7 +128,7 @@ jobs:
            Out-File licenses.html
       
       - name: Upload license markdown report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: license-report      
           path: |
