@@ -369,7 +369,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up k6
-        uses: grafana/setup-k6-action@028f4093bd657dad286be8f4e983cda9b1f8ec4b
+        uses: grafana/setup-k6-action@c47136d33d365efbeb9ae7266908b5dcf98cdece
         with:
           k6-version: '1.6.0'
 
