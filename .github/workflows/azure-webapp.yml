@@ -327,11 +327,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Run Selenium tests
-        run: >
-          xvfb-run --auto-servernum \
-          dotnet test \
-          SeleniumTests/SeleniumTests.csproj \
-          --configuration Release
+        run: xvfb-run --auto-servernum dotnet test SeleniumTests/SeleniumTests.csproj --configuration Release
         env:
           BASE_URL: ${{ env.STAGING_URI }}
 
