@@ -44,8 +44,7 @@ export const options = {
   cloud: {
     projectID: 8495420,
     distribution: {
-      dublin: { loadZone: 'amazon:ie:dublin', percent: 50 },
-      paris: { loadZone: 'amazon:fr:paris', percent: 50 },
+      dublin: { loadZone: 'amazon:ie:dublin', percent: 100 },
     },
   },
 };
