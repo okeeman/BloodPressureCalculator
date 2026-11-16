@@ -6,7 +6,7 @@
   "scripts": {
     "test": "playwright test",
     "loadtest": "k6 run loadtest/blood-pressure.js",
-    "loadtest:cloud": "k6 cloud run --local-execution loadtest/blood-pressure.js"
+    "loadtest:cloud": "k6 cloud run loadtest/blood-pressure.js"
   },
   "repository": {
     "type": "git",

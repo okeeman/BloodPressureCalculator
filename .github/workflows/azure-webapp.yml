@@ -46,7 +46,10 @@ jobs:
           path: bicep-lint-report.txt
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: >
+          dotnet build \
+          --configuration Release \
+           --no-restore
 
       - name: Upload build outputs
         uses: actions/upload-artifact@v7
@@ -59,7 +62,10 @@ jobs:
           retention-days: 1
 
       - name: Publish
-        run: dotnet publish BPCalculator/BPCalculator.csproj --configuration Release --no-build --output publish
+        run: >
+          dotnet publish BPCalculator/BPCalculator.csproj \
+          --configuration Release \
+          --no-build \--output publish
 
       - name: Upload web app package
         uses: actions/upload-artifact@v7
@@ -156,10 +162,20 @@ jobs:
         run: dotnet restore
 
       - name: Run unit tests with coverage
-        run: dotnet test TestBPCalculator/BPCalculatorUnitTests.csproj --configuration Release --coverage --coverage-output "${{ github.workspace }}/coverage/unit.cobertura.xml" --coverage-output-format cobertura
+        run: >
+          dotnet test TestBPCalculator/BPCalculatorUnitTests.csproj
+          --configuration Release
+          --coverage
+          --coverage-output "${{ github.workspace }}/coverage/unit.cobertura.xml"
+          --coverage-output-format cobertura
 
       - name: Run Reqnroll acceptance tests with coverage
-        run: dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj --configuration Release --coverage --coverage-output "${{ github.workspace }}/coverage/reqnroll.cobertura.xml" --coverage-output-format cobertura
+        run: >
+          dotnet test BPCalculator.ReqnrollTests/BPCalculator.ReqnrollTests.csproj
+          --configuration Release
+          --coverage
+          --coverage-output "${{ github.workspace }}/coverage/reqnroll.cobertura.xml"
+          --coverage-output-format cobertura
 
       - name: Upload C# coverage reports
         uses: actions/upload-artifact@v7
@@ -310,7 +326,11 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Run Selenium tests
-        run: xvfb-run --auto-servernum dotnet test SeleniumTests/SeleniumTests.csproj --configuration Release
+        run: >
+          xvfb-run --auto-servernum \
+          dotnet test \
+          SeleniumTests/SeleniumTests.csproj \
+          --configuration Release
         env:
           BASE_URL: ${{ env.STAGING_URI }}
 

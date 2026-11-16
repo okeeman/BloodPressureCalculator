@@ -6,10 +6,10 @@ const baseUrl = (__ENV.BASE_URL || 'https://bloodpressurewebapp-hnd9b7dafpfeawa7
 const maxVUs = Number.parseInt(__ENV.MAX_VUS || '10', 10);
 
 const readings = [
-  { systolic: 80, diastolic: 50, category: 'Low:' },
-  { systolic: 110, diastolic: 70, category: 'Ideal:' },
-  { systolic: 125, diastolic: 75, category: 'Pre-High:' },
-  { systolic: 150, diastolic: 95, category: 'High:' },
+  { systolic: [70, 89], diastolic: [40, 59], category: 'Low:' },
+  { systolic: [90, 119], diastolic: [60, 79], category: 'Ideal:' },
+  { systolic: [120, 139], diastolic: [60, 89], category: 'Pre-High:' },
+  { systolic: [140, 190], diastolic: [90, 100], category: 'High:' },
 ];
 
 if (!Number.isInteger(maxVUs) || maxVUs < readings.length) {
@@ -43,10 +43,16 @@ export const options = {
   },
   cloud: {
     projectID: 8495420,
+    distribution: {
+      dublin: { loadZone: 'amazon:ie:dublin', percent: 50 },
+      paris: { loadZone: 'amazon:fr:paris', percent: 50 },
+    },
   },
 };
 
 function submitReading(reading) {
+  const systolic = randomValue(reading.systolic);
+  const diastolic = randomValue(reading.diastolic);
   const page = http.get(`${baseUrl}/`);
   const pageLoaded = check(page, {
     'calculator page responds successfully': (response) => response.status === 200,
@@ -70,8 +76,8 @@ function submitReading(reading) {
     `${baseUrl}/`,
     {
       '__RequestVerificationToken': token,
-      'BP.Systolic': String(reading.systolic),
-      'BP.Diastolic': String(reading.diastolic),
+      'BP.Systolic': String(systolic),
+      'BP.Diastolic': String(diastolic),
     },
     {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -85,6 +91,10 @@ function submitReading(reading) {
   });
 
   sleep(1);
+}
+
+function randomValue([minimum, maximum]) {
+  return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
 }
 
 export function testCategory1() {
