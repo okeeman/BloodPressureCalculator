@@ -1,0 +1,11 @@
+name: BloodPressureCalculator CodeQL configuration
+
+paths-ignore:
+  - "**/bin/**"
+  - "**/obj/**"
+  - "**/Generated_Code/**"
+  - "**/*.g.cs"
+  - "**/*.g.i.cs"
+  - "**/*.Designer.cs"
+  - "**/*.generated.cs"
+  - "**/*feature.cs"
