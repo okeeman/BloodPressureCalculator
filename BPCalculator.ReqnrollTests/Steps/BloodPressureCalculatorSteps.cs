@@ -34,14 +34,14 @@ public sealed class BloodPressureCalculatorSteps
         Assert.IsNotNull(_client);
         Assert.IsNotNull(_antiforgeryToken);
 
-        using var response = await _client.PostAsync(
-            "/",
-            new FormUrlEncodedContent(
-            [
-                new KeyValuePair<string, string>("__RequestVerificationToken", _antiforgeryToken),
-                new KeyValuePair<string, string>("BP.Systolic", systolic.ToString()),
-                new KeyValuePair<string, string>("BP.Diastolic", diastolic.ToString())
-            ]));
+        using var formContent = new FormUrlEncodedContent(
+        [
+            new KeyValuePair<string, string>("__RequestVerificationToken", _antiforgeryToken),
+            new KeyValuePair<string, string>("BP.Systolic", systolic.ToString()),
+            new KeyValuePair<string, string>("BP.Diastolic", diastolic.ToString())
+        ]);
+
+        using var response = await _client.PostAsync("/", formContent);
 
         response.EnsureSuccessStatusCode();
         _page = await response.Content.ReadAsStringAsync();
