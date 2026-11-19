@@ -32,7 +32,7 @@ namespace BPCalculator.Pages
         public IActionResult OnPost()
         {
             // extra validation
-            if (!(this.BP.Systolic > this.BP.Diastolic))
+            if (this.BP.Systolic <= this.BP.Diastolic)
             {
                 this.ModelState.AddModelError(string.Empty, "Systolic must be greater than Diastolic");
             }
